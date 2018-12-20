@@ -1,0 +1,8 @@
+timeout=15
+default=0
+
+title XOS
+kernel /boot/kernel.bin
+
+# filesystem loaded as a module
+module /modules/fs.img
