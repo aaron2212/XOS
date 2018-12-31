@@ -3,8 +3,9 @@ TODO:
     - Fix shift key press glitch in kbd.c?
     - Fix characters not being printed properly when typing?
     - Fix shell memory allocation failure problem
-    - Create open files table and check if the file being opened is already in the table
     - (change printf() to kprintf())
+    - fopen(): "read" mode: if doesn't exist, return NULL; "write" mode: create new file; etc...
+    - write ferror() and errno.h
 
 FUTURE TODO:
     - add putc() ability to write to different streams

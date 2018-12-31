@@ -20,11 +20,11 @@ extern int* load_module(multiboot_info_t* mbinfo, const char* module);
 extern void* memcpy(void* dst, const void* src, size_t size);
 extern void* memset(void* ptr, int value, size_t count);
 
-extern char* rootfs_start, *rootfs_end;
+extern unsigned char* rootfs_start;
+extern unsigned char* rootfs_end;
 extern unsigned int kernel_end;
 extern unsigned int heap_size;
 extern unsigned int available_memory;
-FILE* open_files[MAX_OPEN_FILES];
 
 // Handle all filesystem related tasks
 int init_fs(multiboot_info_t* mbinfo);
@@ -36,5 +36,8 @@ char* current_dir;
 
 // The file descriptor to use when opening a file
 unsigned short current_file_descriptor;
+
+// A list of filesystem structures where the file stream's file descriptor is used as an index into the array
+struct filesystem file_streams[MAX_OPEN_FILES];
 
 #endif

@@ -5,6 +5,7 @@
 
 size_t strlen(const char* str);
 char* strcat(char* dest, const char* src);
+char* strncat(char* dest, const char* src, size_t count);
 char* strcpy(char* dest, const char* src);
 char* strncpy(char* dest, const char* src, int n);
 int strcmp(const char* str1, const char* str2);

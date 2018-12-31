@@ -1,0 +1,6 @@
+iso/
+lib/
+objs/
+testing/
+*.o
+TODO

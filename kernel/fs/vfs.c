@@ -155,7 +155,7 @@ FILE* vfs_open(const char* filename, const char* mode)
 
         // Do not add a leading '/' if the directory begins with a '/'
         if (current_dir[strlen(current_dir)-1] != '/')
-            strcat(full_path, PATH_SEPARATOR);
+            strcat(full_path, PATH_SEPARATOR); // wrong? should be current_dir[0] != '/'??
         
         strcat(full_path, filename);
 
@@ -197,5 +197,22 @@ FILE* vfs_open(const char* filename, const char* mode)
         return NULL;
     }
 
+    // Add the filesystem structure corresponding to the open FILE stream to the list of open files
+    memcpy(&file_streams[current_file_descriptor],
+            &mount_points[fs_index], sizeof(mount_points[fs_index]));
+
     return mount_points[fs_index].open(filename);
+}
+
+// Read `len` bytes from the file into `buf`
+int vfs_read(FILE* stream, char* buf, size_t len)
+{
+    return file_streams[stream->fd].read(stream, buf, len);
+}
+
+// Close the file stream `stream` by removing it from the list of open file streams
+void vfs_close(FILE* stream)
+{
+    // An empty mount point string indicates that there is no currently open file stream
+    strcpy(file_streams[stream->fd].mount_point, "");
 }

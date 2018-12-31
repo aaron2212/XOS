@@ -17,7 +17,7 @@ extern const char *get_last_error();
 
 void timer_wait(unsigned int ticks);
 void init_keyboard();
-int print(const char *format, ...);
+int printf(const char *format, ...);
 char *strcpy(char *dest, const char *src);
 void gets(char *s);
 
@@ -25,7 +25,9 @@ extern int end;
 unsigned int available_memory; // Amount of available memory in KB
 unsigned int heap_size; // Heap size in KB
 
-char* rootfs_start, *rootfs_end; // The start and end of the actual filesystem loaded after the heap
+// The start and end of the rootfs filesystem loaded after the heap
+unsigned char* rootfs_start;
+unsigned char* rootfs_end;
 
 unsigned int kernel_end = (unsigned int) &end + 10;
 

@@ -10,7 +10,6 @@
 /* main part of kernel code */
 
 // TODO: move all printf() status messages to the appropriate functions
-// TODO: create a table with all currently open files
 
 void k_main(void* mb_struct)
 {
@@ -60,19 +59,39 @@ void k_main(void* mb_struct)
 
 	// If the filesystem was loaded successfully (enough memory, mounted filesystem etc)
 	if (is_fs_loaded)
-		printf("Filesystem loaded at address 0x%x\n", rootfs_start);
+		printf("Filesystem loaded at address 0x%x: %d directories, %d files\n", 
+				rootfs_start, total_rootfs_dirs, total_rootfs_files);
 	else
 		printf("Could not load filesystem: %s\n", get_last_error());
 
-	const char* filename = "/bin/ls";
-	
-	FILE* fp = fopen(filename, "rw");
+	//const char* filename = "/home/aaron/documents/DILE Assignment Q1.docx";
+	  const char* filename = "/bin/ls";
+
+	FILE* fp = fopen(filename, "r");
 
 	if (fp == NULL) {
 		printf("Failed to open file\n");
-	} else {
-		
 	}
+
+	printf("File %s has start_block=%d and size=%d\n\n", filename, fp->start_block, fp->size);
+
+	printf("ftell=%d\n", ftell(fp));
+
+	int c = fgetc(fp);
+
+	printf("c=%c\n", c);
+
+	printf("ftell=%d\n", ftell(fp));
+
+	char buf[41];
+
+	fread(buf, sizeof(buf), 1, fp);
+
+	buf[41] = '\0';
+	
+	printf("buf=%s\n", buf);
+
+	printf("ftell=%d\n\n", ftell(fp));
 
 	while (1) {
 		shell();

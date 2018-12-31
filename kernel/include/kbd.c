@@ -27,7 +27,7 @@ static char shift_scancode[59] = {
 
 void init_keyboard()
 {
-	irq_install_handler(1, kbd_getchar);
+	irq_install_handler(1, (void*) kbd_getchar);
 }
 
 // TODO: remove hardcoded colors

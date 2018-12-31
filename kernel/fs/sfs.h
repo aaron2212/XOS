@@ -18,8 +18,10 @@
 
 extern int printf(const char *fmt, ...);
 extern void* memset(void* ptr, int value, size_t count);
+extern void* memcpy(void* dest, const void* src, size_t count);
 extern char* strncpy(char* dst, const char* src, int n);
 extern char* strcat(char* dst, const char* src);
+extern char* strncat(char* dest, const char* src, size_t count);
 extern int strcmp(const char* str1, const char* str2);
 extern int strncmp(const char* str1, const char* str2, int n);
 extern size_t strlen(const char* str);
@@ -27,23 +29,23 @@ extern void* kmalloc(size_t size);
 extern void* kcalloc(size_t num, size_t size);
 extern void kfree(void* ptr);
 extern void set_error(const char* message, ...);
+// extern int EOF;
 
-extern char* rootfs_start; // The start of the filesystem
-extern char* rootfs_end; // The end of the filesystem
+extern unsigned char* rootfs_start; // The start of the filesystem
+extern unsigned char* rootfs_end; // The end of the filesystem
 extern unsigned short current_file_descriptor; // The integer of the next file's file descriptor (ID)
-char* index_start; // The start of the index area
+unsigned char* index_start; // The start of the index area
 
 void init_sfs();
 
 FILE* open(const char *filename);
 void close();
-void read();
+int read(FILE* stream, char* buf, size_t len);
 void write();
 void readdir();
 void mount();
 void umount();
 
-FILE* find_entry_by_name(const char* name);
 char* get_entry_name_by_offset(char* pos);
 
 enum entries {
@@ -85,7 +87,7 @@ struct directory_entry {
 
 // File entry - specifies that the entry is a file
 struct file_entry {
-	uint8_t  type;					// entry type (0x11 for directory entry)
+	uint8_t  type;					// entry type (0x12 for file entry)
 	uint8_t  num_cont_entries;		// number of continuation entries following this entry
 	uint64_t timestamp;				// timestamp
 	uint64_t start_block;			// starting block number in the data area
@@ -142,18 +144,26 @@ struct starting_marker_entry {
 
 // The superblock structure used for determining information about the SFS (rootfs) filesystem
 struct superblock rootfs_superblock;
+unsigned int total_entries;
 
 // Holds any type of entry and its associated entry type value
 struct entry {
 	int type;
 
 	union {
-		struct directory_entry dir_ent;
-		struct file_entry	   file_ent;
+		struct directory_entry 	  	 dir_ent;
+		struct file_entry	   	  	 file_ent;
+		struct continuation_entry 	 cont_entry;
+		struct starting_marker_entry start_entry;
 	} entry;
 };
 
+// The total number of files and directories in the filesystem
+unsigned int total_rootfs_dirs, total_rootfs_files;
+
 // Get a list of all entries in the filesystem
 void find_all_entries(struct entry entries[]);
+void get_entry_names(char** entry_names, struct entry entries[]);
+void count_files_and_dirs();
 
 #endif

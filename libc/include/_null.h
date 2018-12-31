@@ -1,6 +1,6 @@
 #ifndef __NULL
 #define __NULL
 
-#define NULL 0
+#define NULL ((void *)0)
 
 #endif

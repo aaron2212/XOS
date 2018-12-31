@@ -3,5 +3,6 @@
 
 double ceil(double x);
 double floor(double x);
+int abs(int n);
 
 #endif

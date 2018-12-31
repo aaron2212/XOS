@@ -125,7 +125,7 @@ void set_error(const char *message, ...)
 		/* else, print the character */
 
 		else if (message[j-1] != '%') {
-			strcat(error_message, (const char*) ((char*) message[j]));
+			strcat(error_message, (const char*) message[j]);
 		}
 	}
 

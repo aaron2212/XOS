@@ -29,6 +29,7 @@ kernel: $(OBJECTS)
 	@$(CC) $(CFLAGS) include/isr_irq/irqs.c			-o objs/irqs.o
 	@$(CC) $(CFLAGS) include/pit/pit.c				-o objs/pit.o
 	@$(CC) $(CFLAGS) libc/include/string/strcat.c	-o lib/strcat.o
+	@$(CC) $(CFLAGS) libc/include/string/strncat.c	-o lib/strncat.o
 	@$(CC) $(CFLAGS) libc/include/string/strcpy.c	-o lib/strcpy.o
 	@$(CC) $(CFLAGS) libc/include/string/strncpy.c	-o lib/strncpy.o
 	@$(CC) $(CFLAGS) libc/include/string/strlen.c	-o lib/strlen.o
@@ -47,6 +48,12 @@ kernel: $(OBJECTS)
 	@$(CC) $(CFLAGS) libc/include/stdio/getchar.c	-o lib/getchar.o
 	@$(CC) $(CFLAGS) libc/include/stdio/gets.c		-o lib/gets.o
 	@$(CC) $(CFLAGS) libc/include/stdio/fopen.c		-o lib/fopen.o
+	@$(CC) $(CFLAGS) libc/include/stdio/fread.c		-o lib/fread.o
+	@$(CC) $(CFLAGS) libc/include/stdio/feof.c		-o lib/feof.o
+	@$(CC) $(CFLAGS) libc/include/stdio/fgetc.c		-o lib/fgetc.o
+	@$(CC) $(CFLAGS) libc/include/stdio/ftell.c		-o lib/ftell.o
+	@$(CC) $(CFLAGS) libc/include/stdio/fseek.c		-o lib/fseek.o
+	@$(CC) $(CFLAGS) libc/include/stdio/fclose.c	-o lib/fclose.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/itoa.c		-o lib/itoa.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kmalloc.c	-o lib/kmalloc.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kcalloc.c	-o lib/kcalloc.o
@@ -73,11 +80,11 @@ run: os.iso
 	@qemu-system-i386 -m 1024M -cdrom os.iso
 
 
-%.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
-
-%.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+#%.o: %.c
+#	$(CC) $(CFLAGS)  $< -o $@
+#
+#%.o: %.s
+#	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
 	rm -rf *.o kernel.bin os.iso

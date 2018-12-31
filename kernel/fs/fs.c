@@ -7,7 +7,12 @@
 // Perform initialization of all filesystem related tasks
 int init_fs(multiboot_info_t* mbinfo)
 {
-    memset(open_files, NULL, sizeof(open_files)); // No open files when the operating system starts
+    /*
+     * Invalidate each file stream
+     */
+    for (unsigned int i=0; i<sizeof(file_streams); i++) {
+        strcpy(file_streams[i].mount_point, "");
+    }
 
     return init_rootfs(mbinfo);
 }
@@ -18,20 +23,21 @@ int init_rootfs(multiboot_info_t* mbinfo)
     // Initialize the list of mount points to NULL values
     init_mounts();
 
-    current_file_descriptor = 0;
+    // 0, 1, 2 for stdin, stdout, stderr respectively
+    current_file_descriptor = 3;
 
     // Set the current directory to '/'
     current_dir = kcalloc(CURRENT_DIR_BUF, 1);
     strcpy(current_dir, "/");
 
-    struct filesystem rootfs = {NULL};
+    struct filesystem rootfs = {0};
     
     // The name and the path that the rootfs filesystem is mounted at, as well as its type
     strcpy(rootfs.name, ROOTFS_NAME);
     strcpy(rootfs.mount_point, ROOTFS_MOUNT_POINT);
     strcpy(rootfs.type, ROOTFS_TYPE);
 
-    // Functional to call when the rootfs' file operation methods are called
+    // Functional to call when the rootfs file operation methods are called
     rootfs.open    = open;
     rootfs.close   = close;
     rootfs.read    = read;
@@ -53,7 +59,7 @@ int init_rootfs(multiboot_info_t* mbinfo)
 
         if (fs_mod_start != NULL) {
             // The location after the heap where the filesystem will be copied to
-            rootfs_start = (char*) kernel_end + heap_size + 1;
+            rootfs_start = (unsigned char*) kernel_end + heap_size + 1;
 
             // Retrieve the total number of blocks the filesystem uses, as stored in the superblock
 			unsigned long total_blocks = *((char*) fs_mod_start+432);

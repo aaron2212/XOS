@@ -23,15 +23,15 @@ extern void* kcalloc(size_t size, size_t num);
 extern void kfree(void* ptr);
 extern const char* strchr(const char* str, int ch);
 
-// FILE structure, as return by vfs_open()
+// FILE structure, as return by vfs_open() (35 bytes)
 typedef struct _FILE {
-	uint8_t   flags[4];
+	uint8_t   mode;
 	uint64_t  size;
 	uint16_t  fd;
-	uint8_t   eof;
+	int8_t    eof;
 	uint64_t  position;
 	uint64_t  start_block;
-    int8_t*   offset; // The offset of the index area entry on disk/in memory
+    uint8_t*  offset; // The offset of the index area entry on disk/in memory
 } FILE;
 
 
@@ -42,9 +42,10 @@ struct filesystem {
     char mount_point[FS_MOUNT_POINT_LEN];
     bool readonly;
     FILE* (*open)(const char *filename);
-    void (*close)(FILE stream);
-    void (*read)(FILE* stream, char* buf, size_t len);
+    void (*close)(FILE* stream);
+    int (*read)(FILE* stream, char* buf, size_t len);
     void (*write)(FILE* stream, const char* buf, size_t len);
+    void (*opendir)(const char* dirname);
     void (*readdir)(/*DIR* dir*/);
     void (*mount)();
     void (*umount)();
@@ -74,5 +75,7 @@ int find_fs_by_filename(const char* filename);
 
 // VFS I/O operations
 FILE* vfs_open(const char* filename, const char* mode);
+int vfs_read(FILE* stream, char* buf, size_t len);
+void vfs_close(FILE* stream);
 
 #endif
