@@ -1,7 +1,7 @@
 #include "../../libc/include/stdint.h"
 #include "pit.h"
 
-extern int printf(const char* fmt, ...);
+extern int kprintf(const char* fmt, ...);
 extern unsigned char outb(unsigned short port, unsigned char val);
 
 unsigned int ticks = 0;
@@ -10,7 +10,7 @@ unsigned int ticks = 0;
 // {
 // 	ticks++;
 
-// 	printf("Tick: %d\n", ticks);
+// 	kprintf("Tick: %d\n", ticks);
 // }
 
 // void init_timer(int frequency)
@@ -28,7 +28,7 @@ unsigned int ticks = 0;
 // 	outb(0x40, high);
 // }
 
-// extern int printf(const char* fmt, ...);
+// extern int kprintf(const char* fmt, ...);
 // extern void irq_install_handler(int irq, void (*handler)(struct regs *s));
 // unsigned char outb(uint16_t port, uint8_t val);
 // unsigned char inb(uint16_t port);
@@ -48,7 +48,7 @@ unsigned int ticks = 0;
 
 // 	if (timer_ticks % 18 == 0)
 // 	{
-// 		printf("One second has passed");
+// 		kprintf("One second has passed");
 // 	}
 // }
 

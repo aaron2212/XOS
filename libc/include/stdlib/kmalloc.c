@@ -13,7 +13,6 @@
 extern unsigned int kernel_end;
 extern unsigned int available_memory;
 extern unsigned int heap_size;
-extern int printf(const char* fmt, ...);
 
 unsigned char* pos = (unsigned char*) 1024; // The beginning position of memory to allocate
 

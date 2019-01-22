@@ -1,11 +1,13 @@
 #ifndef _FS_H
 #define _FS_H
 
-#define ROOTFS_NAME        "SFS"
-#define ROOTFS_TYPE        "rootfs"
-#define ROOTFS_MOUNT_POINT "/"
-#define CURRENT_DIR_BUF    1024
-#define PATH_SEPARATOR     "/"
+#define ROOTFS_NAME         "SFS"
+#define ROOTFS_TYPE         "rootfs"
+#define ROOTFS_MOUNT_POINT  "/"
+#define CURRENT_DIR_BUF     1024
+#define PATH_SEPARATOR      "/"
+#define PATH_SEPARATOR_CHAR '/'
+#define ROOT_DIR            '/'
 
 #define MAX_OPEN_FILES     32768
 

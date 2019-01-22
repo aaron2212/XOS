@@ -12,7 +12,7 @@ void dump_memory(void* ptr, size_t size)
         //char* str = "";
 
         // if (!((line_len+len) >= 80)) {
-        printf("%x ", *(ptr2+i));
+        kprintf("%x ", *(ptr2+i));
         // } else {
         //     printf("\n");
         //     line_len = 0;
@@ -28,5 +28,5 @@ void dump_memory(void* ptr, size_t size)
         // line_len += len;
     }
 
-    printf("\n\n");
+    kprintf("\n\n");
 }

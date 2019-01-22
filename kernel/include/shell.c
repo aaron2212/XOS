@@ -3,33 +3,38 @@
 
 extern void* kmalloc(size_t size);
 extern void* krealloc(void* ptr, size_t size);
-
-int numArgs;
-
-// Maybe a basic shell that is launched before te rest of the operting systems runs (ie. no processes or users etc, only a fs)
+extern int kprintf(const char* fmt, ...);
 
 typedef struct fn_table_entry {
 	char* name;
 	void (*fn)();
 } fn_table_entry_t;
 
-fn_table_entry_t fn_table[] = {{"help", xsh_help}, {"echo", xsh_echo}, {"exit", xsh_exit},
-							   {"clear", xsh_clear_screen}
+// A list of shell commands with their corresponding functions to be called when the command is entered
+fn_table_entry_t fn_table[] = {
+							   {"help", xsh_help},
+							   {"echo", xsh_echo},
+							   {"exit", xsh_exit},
+							   {"clear", xsh_clear_screen},
+							   {"cat", xsh_cat},
+							   {"touch", xsh_touch},
+							   {"cd", xsh_cd},
 							  };
 
 char* builtin_commands[] = {
 	"help",
 	"echo",
 	"exit",
-	"clear"
+	"clear",
+	"cat",
+	"touch",
+	"cd",
 };
 
 void (*fn_lookup(char *fname))()
 {
-	for (unsigned int i=0; i<sizeof(fn_table)/sizeof(fn_table[0]); i++)
-	{
-		if (strcmp(fname, fn_table[i].name) == 0)
-		{
+	for (unsigned int i=0; i<sizeof(fn_table)/sizeof(fn_table[0]); i++) {
+		if (strcmp(fname, fn_table[i].name) == 0) {
 			return fn_table[i].fn;
 		}
 	}
@@ -39,12 +44,13 @@ void (*fn_lookup(char *fname))()
 
 void shell()
 {
-	// TODO: change printf('$ ') to the format `user@host:dir$ `
+	// TODO: change kprintf('dir$ ') to the format `user@host:dir$ `
+	// future TODO: check if user is root and so change "$" to "#"
 
 	char* line;
 	char** args;
 
-	printf("%s$ ", current_dir);
+	kprintf("%s$ ", current_dir);
 
 	line = read_line();
 
@@ -57,13 +63,13 @@ void shell()
 
 				// Do not print an extra new line if the terminal screen was cleared
 				if (strcmp(args[0], "clear") != 0) {
-					printf("\n");
+					kprintf("\n");
 				}
 
 				return;
 			} else if (i == sizeof(builtin_commands)/sizeof(builtin_commands[0])-1) {
 				// TODO: check if command is name of program and start a process
-				printf("Unknown command. Try \"help\" for a list of commands\n");
+				kprintf("Unknown command. Try \"help\" for a list of commands\n");
 
 				return;
 			}
@@ -84,7 +90,7 @@ char* read_line()
 	index = 0;
 
 	if (!buffer) {
-		printf("Failed to allocate memory!");
+		kprintf("Failed to allocate memory!");
 		// exit(EXIT_FAILURE);
 	}
 
@@ -103,7 +109,7 @@ char* read_line()
 			buffer = (char*) krealloc(buffer, buffer_size);
 
 			if (!buffer)
-				printf("Failed to allocate memory!");
+				kprintf("Failed to allocate memory!");
 		}
 	}
 
@@ -112,57 +118,62 @@ char* read_line()
 
 char** split_line(char* line)
 {
-	int buffer_size = TOK_BUF_SIZE;
-	int pos = 0;
+	unsigned int i = 0; // The current position within the `args` array
 
-	char** tokens = (char**) kmalloc(buffer_size);
-	char* token;
+	unsigned int num_spaces = 0;
+	num_args = 0; // Reset the number of arguments for each command
 
-	if (!tokens) {
-		printf("Failed to allocate memory!");
+	// Determine the number of spaces in the line so that we know how much memory to allocate
+	for (unsigned int i=0; i<strlen(line); i++) {
+		if (line[i] == ' ')
+			num_spaces++;
+	}
+
+	// Allocate memory for the number of arguments
+	char** args = kcalloc(num_spaces+1, 1);
+	char* arg; 
+
+	if (!args) {
+		kprintf("Failed to allocate memory!");
 		// exit(EXIT_FAILURE);
 	}
 
-	token = strtok(line, TOK_DELIM); // correct always
+	/*
+	 * Continue to split the line into arguments while there are still `TOK_DELIM`s
+	 */
+	arg = strtok(line, TOK_DELIM);
 
-	while (token != NULL) {
-		tokens[pos] = token;
-		pos++;
-
-		if (pos >= buffer_size) {
-			buffer_size += BUF_SIZE;
-			tokens = (char**) krealloc(tokens, buffer_size * sizeof(char*));
-
-			if (!tokens)
-				printf("Failed to allocate memory!");
-				// exit(EXIT_FAILURE);
-		}
-
-		token = strtok(NULL, TOK_DELIM);
-		numArgs++;
+	while (arg != NULL) {
+		args[i++] = arg;
+		arg = strtok(NULL, TOK_DELIM); // Get the next argument
+		num_args++;
 	}
 
-	tokens[pos] = NULL;
+	args[i] = NULL;
 
-	return tokens;
+	return args;
 }
 
+// Prints a help message, display a list of available shell commands
 void xsh_help()
 {
-	printf(
+	kprintf(
 		"echo:  print to the screen\n"
 		"help:  show this help information\n"
 		"exit:  exits the shell (or OS if this is the only shell)\n"
-		"clear: clears the screen"
+		"clear: clears the screen\n"
+		"cat:   display the contents of a file\n"
+		"touch: create a new file\n"
+		"cd:    change the current working directory"
 	);
 }
 
 // Prints the output after the "echo" command
 void xsh_echo(char** args)
 {
-	for (int i=1; i<numArgs; i++) {
+	for (unsigned int i=1; i<num_args; i++) {
 		if (args[i] != NULL) {
-			printf("%s ", args[i]);
+			kprintf("%s ", args[i]);
 		}
 	}
 }
@@ -170,7 +181,7 @@ void xsh_echo(char** args)
 // Exits the shell (and possibly the OS too. User should use "shutdown" command if they wish to shutdown the computer)
 void xsh_exit()
 {
-	printf("Exit requested!");
+	kprintf("Exit requested!");
 }
 
 
@@ -178,4 +189,54 @@ void xsh_exit()
 void xsh_clear_screen()
 {
 	terminal_clear_screen();
+}
+
+// Display the contents of a file
+void xsh_cat(char** args)
+{
+	// The name of the file to read
+	char* filename = args[1];
+
+	// Attempt to open a file stream with the given filename
+	FILE* fp = fopen(filename, "r");
+
+	if (fp == NULL) {
+		kprintf("cat: %s: no such file", filename);
+
+		return;
+	}
+	
+	// The file is valid. So read its contents
+	char buffer[fp->size+1];
+
+	fread(buffer, sizeof(buffer), 1, fp);
+
+	buffer[fp->size+1] = '\0';
+
+	kprintf("%s\n", buffer);
+
+	fclose(fp);
+}
+
+// TODO: check for invalid filename
+// Create a new file
+void xsh_touch(/*char** args*/)
+{
+	kprintf("TODO: implement");
+}
+
+// Change the current working directory
+void xsh_cd(char** args)
+{
+	// Get the directory name to change to
+	char* dirname = args[1];
+
+	// Only attempt to change the directory if the user specified a directory
+	if (strcmp(dirname, "") != 0) {
+		// result=-1 means failed to find directory matching `dirname`
+		int result = vfs_change_dir(dirname);
+
+		if (result == -1)
+			kprintf("cd: %s: no such directory", dirname);
+	}
 }

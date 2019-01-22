@@ -109,7 +109,7 @@ char kbd_getchar()
 						// enter pressed
 						vidmem[i+1] = terminal_color;
 						is_shift_pressed = false;
-						printf("\n");
+						kprintf("\n");
 						return '\n';			// tell the shell we've pressed enter and process the input
 					} else if (is_shift_pressed && c != KBD_BACKSPACE) {
 						// shift pressed and not backspace
@@ -166,7 +166,7 @@ char* kbd_getstring()
 
 	while ((c = kbd_getchar()) != '\n') {
 		if (c == KBD_BACKSPACE) {
-			printf("%d ", c);
+			kprintf("%d ", c);
 		}
 
 		s[pos++] = c;

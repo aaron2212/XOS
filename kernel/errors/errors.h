@@ -8,7 +8,7 @@
 
 extern char *strcpy(char *dst, const char *src);
 extern size_t strlen(const char *str);
-extern int printf(const char *fmt, ...);
+extern int kprintf(const char *fmt, ...);
 extern char* strcat(char* dst, const char* src);
 extern char itoa(int value, char* str, int base);
 extern void strrev(char* str);

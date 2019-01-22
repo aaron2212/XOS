@@ -3,7 +3,7 @@
 #include "errors.h"
 
 // Return the error message
-const char *get_last_error()
+const char* get_last_error()
 {
     return error_message;
 }
@@ -16,7 +16,7 @@ void set_error(const char *message, ...)
 
     // Make sure the error message doesn't exceed the length of the buffer
     if (strlen(error_message) >= ERROR_MESSAGE_LEN) {
-        printf("Error: error message has to be less than %d characters\n", ERROR_MESSAGE_LEN);
+        kprintf("Error: error message has to be less than %d characters\n", ERROR_MESSAGE_LEN);
         return;
     }
 

@@ -1,6 +1,7 @@
-iso/
-lib/
-objs/
-testing/
+iso/*
+lib/*
+objs/*
+testing/*
 *.o
 TODO
+count_os_lines.sh

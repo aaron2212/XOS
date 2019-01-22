@@ -17,7 +17,6 @@ extern const char *get_last_error();
 
 void timer_wait(unsigned int ticks);
 void init_keyboard();
-int printf(const char *format, ...);
 char *strcpy(char *dest, const char *src);
 void gets(char *s);
 

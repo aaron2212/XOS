@@ -2,7 +2,7 @@
 #include "../../libc/include/stdlib/stdlib.h"
 #include "idt.h"
 
-extern int printf(const char *fmt, ...);
+extern int kprintf(const char *fmt, ...);
 extern void *memset(void *ptr, int value, size_t size);
 
 int interrupt_number;
@@ -27,7 +27,7 @@ struct idt_pointer idt_p;
 
 void interrupt_handler(void)
 {
-	printf("Unhandled exception ");
+	kprintf("Unhandled exception ");
 
 	while (1) {
 

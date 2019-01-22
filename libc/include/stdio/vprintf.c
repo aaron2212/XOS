@@ -96,7 +96,7 @@ int vprintf(const char* fmt, va_list args)
 			else if (fmt[j+1] == 'p') {
 				void* ptr = va_arg(args, void*);
 
-				printf("%d", ptr);
+				kprintf("%d", ptr);
 			}
 
 			/* prints a percent (%) */
@@ -109,7 +109,7 @@ int vprintf(const char* fmt, va_list args)
 			/* prints a new line (cursor goes to the beginning of the next line) */
 
 			else if (fmt[j] == '\n') {
-				// Calls to printf() with '\n' result in "\r\n" being printed
+				// Calls to kprintf() with '\n' result in "\r\n" being printed
 				num_chars_written += 1;
 
 				putchar('\n');

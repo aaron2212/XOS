@@ -5,6 +5,7 @@
 #define TOTAL_BLOCKS_OFFSET 	 432
 #define ENTRY_SIZE          	 64
 #define MAGIC               	 "SFS"
+#define VOLUME_NAME				 "SFS"
 
 #define DIRECTORY_NAME_ENTRY_LEN 54
 #define FILENAME_ENTRY_LEN		 30
@@ -16,10 +17,10 @@
 #include "../../libc/include/size_t.h"
 #include "vfs.h"
 
-extern int printf(const char *fmt, ...);
+extern int kprintf(const char *fmt, ...);
 extern void* memset(void* ptr, int value, size_t count);
 extern void* memcpy(void* dest, const void* src, size_t count);
-extern char* strncpy(char* dst, const char* src, int n);
+extern char* strncpy(char* dst, const char* src, size_t count);
 extern char* strcat(char* dst, const char* src);
 extern char* strncat(char* dest, const char* src, size_t count);
 extern int strcmp(const char* str1, const char* str2);
@@ -29,22 +30,21 @@ extern void* kmalloc(size_t size);
 extern void* kcalloc(size_t num, size_t size);
 extern void kfree(void* ptr);
 extern void set_error(const char* message, ...);
-// extern int EOF;
 
 extern unsigned char* rootfs_start; // The start of the filesystem
 extern unsigned char* rootfs_end; // The end of the filesystem
 extern unsigned short current_file_descriptor; // The integer of the next file's file descriptor (ID)
 unsigned char* index_start; // The start of the index area
 
-void init_sfs();
-
+void init();
 FILE* open(const char *filename);
 void close();
 int read(FILE* stream, char* buf, size_t len);
 void write();
+FILE* create(char* filename);
 void readdir();
-void mount();
-void umount();
+void opendir();
+int change_dir(char* dirname);
 
 char* get_entry_name_by_offset(char* pos);
 
@@ -56,7 +56,7 @@ enum entries {
 	UNUSABLE_ENTRY		  	= 0x18,
 	DELETED_DIRECTORY_ENTRY = 0x19,
 	DELETED_FILE_ENTRY	  	= 0x1A,
-	VOLUME_IDENTIFIER_ENTRY = -0x01 // get
+	VOLUME_IDENTIFIER_ENTRY = 0x01
 };
 
 // 512 bytes
@@ -120,7 +120,7 @@ struct deleted_file_entry {
 	uint64_t timestamp;			// the time when the file was deleted
 	uint64_t start_block;		// the starting block number in the data area
 	uint64_t end_block;			// the ending block number in the data area
-	uint64_t file_length;		// the length of the deleted file
+	uint64_t size;				// the length of the deleted file
 	uint8_t filename[30];		// the name of the deleted file
 } __attribute__((packed));
 
@@ -142,19 +142,29 @@ struct starting_marker_entry {
 	uint8_t reserved[63];		// unused
 } __attribute__((packed));
 
+// Volume identifier entry - used to identify the end of the volume
+struct volume_identifier_entry {
+	uint8_t  type;				// entry type (0x01 for volume identifier)
+	uint8_t  reserved[3];		// reserved
+	uint64_t timestamp;			// timestamp
+	uint8_t  volume_name[52];	// volume name in UTF-8, null terminated
+} __attribute__((packed));
+
 // The superblock structure used for determining information about the SFS (rootfs) filesystem
 struct superblock rootfs_superblock;
-unsigned int total_entries;
+unsigned int total_rootfs_entries;
 
 // Holds any type of entry and its associated entry type value
 struct entry {
 	int type;
 
 	union {
-		struct directory_entry 	  	 dir_ent;
-		struct file_entry	   	  	 file_ent;
-		struct continuation_entry 	 cont_entry;
-		struct starting_marker_entry start_entry;
+		struct directory_entry 	  	   dir_ent;
+		struct file_entry	   	  	   file_ent;
+		struct deleted_directory_entry del_dir_ent;
+		struct deleted_file_entry	   del_file_ent;
+		struct continuation_entry 	   cont_entry;
+		struct starting_marker_entry   start_entry;
 	} entry;
 };
 
@@ -163,7 +173,8 @@ unsigned int total_rootfs_dirs, total_rootfs_files;
 
 // Get a list of all entries in the filesystem
 void find_all_entries(struct entry entries[]);
-void get_entry_names(char** entry_names, struct entry entries[]);
+void get_entry_names(char** entry_names, struct entry entries[], int _entry_type);
 void count_files_and_dirs();
+bool is_filename_valid();
 
 #endif

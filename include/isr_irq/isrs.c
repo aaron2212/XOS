@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "isrs.h"
 
-extern int printf(const char *fmt, ...);
+extern int kprintf(const char *fmt, ...);
 extern void idt_set_gate(uint32_t i, uint64_t base, uint16_t selector, uint8_t flags);
 unsigned char outb(uint16_t port, uint8_t val);
 unsigned char inb(uint16_t port);
@@ -86,7 +86,7 @@ void dump_registers(uint32_t num, const char *regs, ...)
 
 	for (unsigned int i=0; i<num-1; i++) {
 		int reg = va_arg(args, int);
-		printf("%s=0x%d\n", reg, reg);
+		kprintf("%s=0x%d\n", reg, reg);
 	}
 
 	va_end(args);
@@ -97,7 +97,7 @@ void isr_fault_handler(struct regs r)
 	if (r.int_no < 32)
 	{
 		/* display description of exception that has occured */
-		printf("Caught exception %d [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
+		kprintf("Caught exception %d [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
 		//dump_registers(13, "a", "eax", "ebx", "ecx", "edx", "esi", "edi", "eip", "ebp", "ds", "es", "fs", "gs");
 	}
 }

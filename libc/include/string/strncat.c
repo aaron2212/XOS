@@ -18,5 +18,6 @@ char* strncat(char* dest, const char* src, size_t count)
 
 	// Copy the temporary string over into "dst"
 	strcpy(dest, s);
+	
 	return dest;
 }

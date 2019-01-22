@@ -43,7 +43,7 @@ kernel: $(OBJECTS)
 	@$(CC) $(CFLAGS) libc/include/string/strtok.c	-o lib/strtok.o
 	@$(CC) $(CFLAGS) libc/include/stdio/putc.c		-o lib/putc.o
 	@$(CC) $(CFLAGS) libc/include/stdio/puts.c		-o lib/puts.o
-	@$(CC) $(CFLAGS) libc/include/stdio/printf.c	-o lib/printf.o
+	@$(CC) $(CFLAGS) libc/include/stdio/kprintf.c	-o lib/kprintf.o
 	@$(CC) $(CFLAGS) libc/include/stdio/vprintf.c	-o lib/vprintf.o
 	@$(CC) $(CFLAGS) libc/include/stdio/getchar.c	-o lib/getchar.o
 	@$(CC) $(CFLAGS) libc/include/stdio/gets.c		-o lib/gets.o

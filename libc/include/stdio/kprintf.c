@@ -1,7 +1,7 @@
 #include "stdio.h"
 
 // Unpacks the variable arguments and passes them to vprintf to be printed to the screen
-int printf(const char* fmt, ...)
+int kprintf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

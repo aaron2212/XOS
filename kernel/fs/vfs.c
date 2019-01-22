@@ -2,12 +2,6 @@
 #include "fs.h"
 #include "vfs.h"
 
-// Set the position to add the filesystem to in the array
-void init_mounts()
-{
-    mount_index = 0;
-}
-
 // Register the filesystem by adding it to the list of mount points
 int register_fs(struct filesystem fs)
 {
@@ -29,8 +23,8 @@ int register_fs(struct filesystem fs)
         return set_fs_error(MOUNT_POINT_TOO_LONG);
 
     // Filesystem function operation(s) not set
-    if (fs.open == NULL || fs.close == NULL || fs.read == NULL || fs.write == NULL ||
-            fs.readdir == NULL || fs.mount == NULL || fs.umount == NULL)
+    if (fs.open == NULL || fs.read == NULL || fs.write == NULL ||
+            fs.readdir == NULL)
         return set_fs_error(IO_OPERATION_NOT_SET);
     
     // Check if a filesystem is already mounted at the same mount point
@@ -60,12 +54,9 @@ void unregister_fs(struct filesystem fs)
 
             // Set the filesystem I/O operations to NULL
             mount_points[i].open     = NULL;
-            mount_points[i].close    = NULL;
             mount_points[i].read     = NULL;
             mount_points[i].write    = NULL;
             mount_points[i].readdir  = NULL;
-            mount_points[i].mount    = NULL;
-            mount_points[i].umount   = NULL;
             mount_points[i].readonly = false;
 
             // So that the next filesystem registered will be registered where the
@@ -104,6 +95,9 @@ int set_fs_error(enum fs_errors error_code)
         case PATH_NOT_FOUND:
             set_error("path not found");
             break;
+        case INVALID_FILENAME:
+            set_error("Invalid characters in filename");
+            break;
     }
 
     // Failed to perform the requested action
@@ -139,8 +133,8 @@ int find_fs_by_filename(const char* filename)
     return -1;
 }
 
-// Attempt to open the file by `filename` on the correct filesystem. Return a FILE stream
-FILE* vfs_open(const char* filename, const char* mode)
+// Return the filesystem associated with the file
+struct filesystem get_fs(const char* filename)
 {
     int fs_index = find_fs_by_filename(filename);
 
@@ -170,38 +164,45 @@ FILE* vfs_open(const char* filename, const char* mode)
             set_fs_error(PATH_NOT_FOUND);
         } else {
             kfree(full_path);
-
-            // Return the opened file/directory
-            /*
-             * The path is a relative path.
-             * Prevent opening the file for writing if the filesystem is marked as read-only
-             */
-            if (strchr(mode, 'w') && mount_points[fs_index].readonly) {
-                set_error("Unable to open file: filesystem is readonly");
-
-                return NULL;
-            }
         }
 
         kfree(full_path);
-        //return; // TODO: return a file stream
     }
-    
-    /*
-     * The path is a relative path.
-     * Prevent opening the file for writing if the filesystem is marked as read-only
-     */
-    if (strchr(mode, 'w') && mount_points[fs_index].readonly) {
+
+    return mount_points[fs_index];
+}
+
+// Attempt to open the file by `filename` on the correct filesystem. Return a FILE stream
+FILE* vfs_open(const char* filename, const char* mode)
+{
+    char* path = filename;
+
+    // Make the path `filename` an absolute path
+    make_full_path(path);
+
+    struct filesystem fs = get_fs(filename);
+
+    if (strchr(mode, 'w') && fs.readonly) {
         set_error("Unable to open file: filesystem is readonly");
 
         return NULL;
     }
 
-    // Add the filesystem structure corresponding to the open FILE stream to the list of open files
-    memcpy(&file_streams[current_file_descriptor],
-            &mount_points[fs_index], sizeof(mount_points[fs_index]));
+    // Check for first free file descriptor in the open files table. Exclude standard streams
+    for (unsigned int i=3; i<MAX_OPEN_FILES; i++) {
+        if (strlen(file_streams[i].mount_point) == 0/*strcmp(file_streams[i].mount_point, "") == 0*/) {
+            current_file_descriptor = i;
+            break;
+        }
+        // Cannot open more files than the system allows (MAX_OPEN_FILES)
+        else if (i == MAX_OPEN_FILES-1)
+            return NULL;
+    }
 
-    return mount_points[fs_index].open(filename);
+    // Add the filesystem structure corresponding to the open FILE stream to the list of open files
+    memcpy(&file_streams[current_file_descriptor], &fs, sizeof(fs));
+
+    return fs.open(filename);
 }
 
 // Read `len` bytes from the file into `buf`
@@ -214,5 +215,214 @@ int vfs_read(FILE* stream, char* buf, size_t len)
 void vfs_close(FILE* stream)
 {
     // An empty mount point string indicates that there is no currently open file stream
-    strcpy(file_streams[stream->fd].mount_point, "");
+    strncpy(file_streams[stream->fd].mount_point, "", 0);
+
+    for (unsigned int i=3; i<MAX_OPEN_FILES; i++) {
+        if (strlen(file_streams[i].mount_point) == 0) {
+            kprintf("i=0x%x\n", i);
+            current_file_descriptor = i;
+            
+            return;
+        }
+    }
+
+    set_error("Too many files open");
+}
+
+// Create new empty file
+FILE* vfs_create(char* filename)
+{
+    struct filesystem fs = get_fs(filename);
+    
+    // Prevent creating a file on a readonly filesystem
+    if (fs.readonly) {
+        set_error("Unable to create file: filesystem is readonly");
+
+        return NULL;
+    }
+
+    // Add the filesystem structure corresponding to the open FILE stream to the list of open files
+    memcpy(&file_streams[current_file_descriptor], &fs, sizeof(fs));
+
+    return fs.create(filename);
+}
+
+// Change the current working directory
+int vfs_change_dir(char* dirname)
+{
+    // If the user passed in a `dirname` 
+    if (strlen(dirname) > 0) {
+        // There exists no entry in the filesystem matching '/', so change the directory before checking the name
+        if (strlen(dirname) == 1 && dirname[0] == ROOT_DIR) {
+            current_dir = PATH_SEPARATOR;
+
+            return 0;
+        }
+
+        char* full_path = "";
+
+        strcpy(full_path, dirname);
+
+        // Parse the directory name
+        make_full_path(full_path);
+
+        // Call the appropriate filesystem's function to change the current directory
+        return get_fs(full_path).change_dir(full_path);
+    } else {
+        return -1;
+    }
+}
+
+/*
+ * Parse the path into a proper path.
+ * Parse "../" correctly by removing the previous part of the path.
+ * Ignore any references to "."
+ */
+void make_proper_path(char* path)
+{
+    char* old_current_dir = kmalloc(strlen(current_dir));
+
+    // Save the current directory, because for some reason, it gets overwritten with some other values
+    strcpy(old_current_dir, current_dir);
+
+    // Nothing needed to be done if the path is '/'
+    if (strlen(path) == 1 && path[0] == PATH_SEPARATOR_CHAR)
+        return;
+    
+    unsigned int num_path_separators = 0;
+    bool starts_with_path_separator = (path[0] == '/');
+
+    // Count the number of '/' in the path
+    for (unsigned int i=0; i<strlen(path); i++) {
+        if (path[i] == '/')
+            num_path_separators++;
+    }
+
+    char** dirs = kmalloc(num_path_separators);
+
+    char* dir = strtok(path, PATH_SEPARATOR);
+    unsigned int i = 0; // An index into the `dirs` array. Also the number of directories in the path
+    unsigned int dirs_len = 0; // The total length of all the directories
+
+    // Split the path by each '/' and add it to the `dirs` array
+    while (dir != NULL) {
+        dir[strlen(dir)] = '\0';
+        dirs[i++] = dir;
+
+        dir = strtok(NULL, PATH_SEPARATOR);
+    }
+
+    dirs[i] = NULL;
+    unsigned int new_array_size = i;
+
+    /*
+     * Iterate over the `dirs` array and parse each directory. 
+     * ".." is removed and the previous element to.
+     * "." is removed
+     */
+    unsigned int j = 0;
+
+    while (j < i) {
+        if (strcmp(dirs[j], ".") == 0) {
+            strncpy(dirs[j], "", 0);
+            new_array_size = remove_empty_strings(dirs, new_array_size);
+        } else if (strcmp(dirs[j], "..") == 0) {
+            strncpy(dirs[j], "", 0);
+
+            if (j > 0)
+                strncpy(dirs[j-1], "", 0);
+            
+            new_array_size = remove_empty_strings(dirs, new_array_size);
+            j = 0;
+        } else {
+            j++;
+        }
+    }
+
+    // Create a new path by joining all
+    unsigned int new_path_len = (starts_with_path_separator ? 1 : 0) + dirs_len + num_path_separators; 
+    char new_path[new_path_len*2];
+
+    // Initialize `new_path` to an empty string or to a '/',
+    // based on if the original path started with a '/'
+    if (starts_with_path_separator)
+        strcpy(new_path, PATH_SEPARATOR);
+    else
+        strcpy(new_path, "");
+
+    /*
+     * Iterate over each element in the array and join them together into the string `new_path`
+    */
+    for (unsigned int j=0; j<new_array_size; j++) {
+        strcat(new_path, dirs[j]);
+
+        // Do not add a trailing '/'
+        if (j != i-1)
+                strcat(new_path, PATH_SEPARATOR);
+    }
+
+    
+    new_path[strlen(new_path)] = '\0';
+
+    // Set the path passed in to the new parsed path
+    strcpy(path, new_path);
+
+    kfree(dirs);
+
+    // Restore the current directory
+    strcpy(current_dir, old_current_dir);
+
+    kfree(old_current_dir);
+}
+
+// Remove an empty string from the array by shifting everything after the empty string back once
+int remove_empty_strings(char** array, unsigned int array_size)
+{
+    // Stores all the elements except for the empty strings
+    char** new_array = kmalloc(array_size-1);
+    unsigned int j = 0; // An index into `new_array`
+    unsigned int new_array_size = 0;
+
+    for (unsigned int i=0; i<array_size; i++) {
+        if (strlen(array[i]) > 0) {
+            new_array[j++] = array[i];
+            new_array_size++;
+        }
+    }
+
+    new_array[j] = NULL;
+
+    memcpy(array, new_array, new_array_size * sizeof(char*));
+
+    return new_array_size;
+}
+
+// Turns a relative path into an absolute path. Does nothing to absolute paths
+void make_full_path(char* path)
+{
+    if (strlen(path) > 0) {
+        unsigned int full_path_len = strlen(current_dir) + strlen(path) + 3;
+        char full_path[full_path_len];
+
+        // Determine if the path is absolute or relative
+        if (path[0] == PATH_SEPARATOR_CHAR) {
+            // Absolute
+            strcpy(full_path, path);
+        } else {
+            // Relative
+            strcpy(full_path, current_dir);
+            strcat(full_path, PATH_SEPARATOR);
+            strcat(full_path, path);
+        }
+
+        // Make the path a proper path, ie. parse "." and ".."
+        make_proper_path(full_path);
+
+        if (full_path[strlen(full_path)-1] == PATH_SEPARATOR_CHAR)
+            full_path[strlen(full_path)-1] = '\0';
+
+        strcpy(path, full_path);
+
+        full_path[strlen(full_path)] = '\0';
+    }
 }

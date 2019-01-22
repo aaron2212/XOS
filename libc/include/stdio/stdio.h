@@ -51,7 +51,7 @@ int getchar();
 void gets(char *s);
 char itoa(int value, char *str, int base);
 int vprintf(const char* fmt, va_list arg);
-int printf(const char *fmt, ...);
+int kprintf(const char *fmt, ...);
 
 // Filesystem related functions
 FILE* fopen(const char* filename, const char* mode);

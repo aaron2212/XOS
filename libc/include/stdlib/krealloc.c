@@ -1,7 +1,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 
-extern int printf(const char* fmt, ...);
+extern int kprintf(const char* fmt, ...);
 extern void *memcpy(void *dest, const void *src, size_t size);
 
 void* krealloc(void* ptr, size_t size)

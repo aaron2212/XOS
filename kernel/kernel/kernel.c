@@ -9,12 +9,12 @@
 
 /* main part of kernel code */
 
-// TODO: move all printf() status messages to the appropriate functions
+// TODO: move all kprintf() status messages to the appropriate functions
 
 void k_main(void* mb_struct)
 {
 	terminal_init();
-	printf("XOS booting...\n\n");
+	kprintf("XOS booting...\n\n");
 
 	// Store multiboot information in a structure
 	multiboot_info_t* mbinfo = (multiboot_info_t*) mb_struct;
@@ -32,66 +32,48 @@ void k_main(void* mb_struct)
 	 * Determine whether the filesystem was register successfully.
 	 * Initialize and setup the root filesystem
 	 */
-	printf("Initializing the root filesystem... ");
-	if (init_rootfs(mbinfo) != 0) {
-		printf("Failed to initialize filesystem: %s\n\n", get_last_error());
+	kprintf("Initializing the root filesystem... ");
+	if (init_fs(mbinfo) != 0) {
+		kprintf("Failed to initialize filesystem: %s\n\n", get_last_error());
 	} else {
-		printf("OK\n");
+		kprintf("OK\n");
 		is_fs_loaded = true;
 	}
 
 	// Setup the IDT, GDT, timer and keyboard
-	printf("Initializing the GDT... ");
+	kprintf("Initializing the GDT... ");
 	init_gdt();
-	printf("OK\n");
-	printf("Initializing the IDT and interrupts... ");
+	kprintf("OK\n");
+	kprintf("Initializing the IDT and interrupts... ");
 	init_idt();
 	init_isrs();
 	init_irqs();
 	//init_timer(); /* not working */
 	init_keyboard();
-	printf("OK\n\n");
+	kprintf("OK\n\n");
 	
 	// Status information
-	printf("Kernel ends at address 0x%x\n", kernel_end);
-	printf("Installed memory (RAM): %dMB\n", (available_memory/1024/1024));
-	printf("Heap size: %dMB\n", (heap_size/1024/1024));
+	kprintf("Kernel ends at address 0x%x\n", kernel_end);
+	kprintf("Installed memory (RAM): %dMB\n", (available_memory/1024/1024));
+	kprintf("Heap size: %dMB\n", (heap_size/1024/1024)); // Convert heap size to megabytes
 
 	// If the filesystem was loaded successfully (enough memory, mounted filesystem etc)
 	if (is_fs_loaded)
-		printf("Filesystem loaded at address 0x%x: %d directories, %d files\n", 
+		kprintf("Filesystem loaded at address 0x%x: %d directories, %d files\n", 
 				rootfs_start, total_rootfs_dirs, total_rootfs_files);
 	else
-		printf("Could not load filesystem: %s\n", get_last_error());
+		kprintf("Could not load filesystem: %s\n", get_last_error());
 
-	//const char* filename = "/home/aaron/documents/DILE Assignment Q1.docx";
-	  const char* filename = "/bin/ls";
+	struct entry entries[total_rootfs_entries];
 
-	FILE* fp = fopen(filename, "r");
+	char** entry_names = kcalloc(total_rootfs_entries, 1);
+	get_entry_names(entry_names, entries, DIRECTORY_ENTRY);
 
-	if (fp == NULL) {
-		printf("Failed to open file\n");
+	for (unsigned int i=0; i<total_rootfs_dirs; i++) {
+		kprintf("%s  ", entry_names[i]);
 	}
 
-	printf("File %s has start_block=%d and size=%d\n\n", filename, fp->start_block, fp->size);
-
-	printf("ftell=%d\n", ftell(fp));
-
-	int c = fgetc(fp);
-
-	printf("c=%c\n", c);
-
-	printf("ftell=%d\n", ftell(fp));
-
-	char buf[41];
-
-	fread(buf, sizeof(buf), 1, fp);
-
-	buf[41] = '\0';
-	
-	printf("buf=%s\n", buf);
-
-	printf("ftell=%d\n\n", ftell(fp));
+	kfree(entry_names);
 
 	while (1) {
 		shell();

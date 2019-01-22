@@ -11,13 +11,16 @@
 #include "../../libc/include/size_t.h"
 #include "../../libc/include/stdint.h"
 
-extern int printf(const char* fmt, ...);
+extern int kprintf(const char* fmt, ...);
 extern void* memset(void* ptr, int value, size_t size);
 extern size_t strlen(const char* str);
 extern char* strcpy(char* dst, const char* src);
+extern char* strncpy(char* dst, const char* src, size_t count);
 extern char* strcat(char* str, const char* src);
 extern int strcmp(const char* str1, const char* str2);
 extern int strncmp(const char* str1, const char* str2, int n);
+extern char* strncat(char* dst, const char* src, size_t count);
+extern char* strtok(char* str, const char* delim);
 extern void set_error(const char* message, ...);
 extern void* kcalloc(size_t size, size_t num);
 extern void kfree(void* ptr);
@@ -41,15 +44,14 @@ struct filesystem {
     char type[FS_TYPE_LEN];
     char mount_point[FS_MOUNT_POINT_LEN];
     bool readonly;
+    void (*init)();
     FILE* (*open)(const char *filename);
-    void (*close)(FILE* stream);
     int (*read)(FILE* stream, char* buf, size_t len);
     void (*write)(FILE* stream, const char* buf, size_t len);
+    FILE* (*create)(char* filename); 
     void (*opendir)(const char* dirname);
     void (*readdir)(/*DIR* dir*/);
-    void (*mount)();
-    void (*umount)();
-    /*void (*init)()*/
+    int (*change_dir)(char* dirname);
 };
 
 // Filesystem related errors that may occur when registering the filesystem or accessing files
@@ -61,7 +63,8 @@ enum fs_errors {
     MOUNT_POINT_TOO_LONG    = 4,
     IO_OPERATION_NOT_SET    = 5,
     FS_ALREADY_MOUNTED      = 6,
-    PATH_NOT_FOUND          = 7
+    PATH_NOT_FOUND          = 7,
+    INVALID_FILENAME        = 8,
 };
 
 struct filesystem mount_points[MAX_MOUNTS]; // The list of mount points
@@ -72,10 +75,16 @@ int register_fs(struct filesystem fs);
 void unregister_fs(struct filesystem fs);
 int set_fs_error(enum fs_errors error_code);
 int find_fs_by_filename(const char* filename);
+struct filesystem get_fs();
+int remove_empty_strings(char** array, unsigned int array_size);
+void make_proper_path(char* path);
+void make_full_path(char* path);
 
 // VFS I/O operations
 FILE* vfs_open(const char* filename, const char* mode);
 int vfs_read(FILE* stream, char* buf, size_t len);
 void vfs_close(FILE* stream);
+FILE* vfs_create(char* filename);
+int vfs_change_dir(char* dirname);
 
 #endif

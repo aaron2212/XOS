@@ -1,9 +1,11 @@
 #include "string.h"
 
+extern int kprintf(const char* fmt, ...);
+
 char *strcat(char *dst, const char *src)
 {
 	// Create a new string to store the concatenated strings
-	int s_len = strlen(dst) + strlen(src);
+	int s_len = strlen(dst) + strlen(src) + 1;
 	char s[s_len];
 	memset(s, 0, sizeof(s));
 

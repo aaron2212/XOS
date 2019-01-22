@@ -35,7 +35,7 @@ extern int terminal_color;
 extern void terminal_write(char *str);
 extern void terminal_putchar(char c);
 extern void terminal_scroll();
-extern int printf(const char *fmt, ...);
+extern int kprintf(const char *fmt, ...);
 extern void move_cursor(uint32_t _x, uint32_t _y);
 
 void init_keyboard();

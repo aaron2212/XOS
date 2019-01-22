@@ -3,13 +3,16 @@
 #include "../../libc/include/_null.h"
 #include "../../libc/include/size_t.h"
 #include "../../libc/include/stdint.h"
+#include "../../libc/include/math/math.h"
 #include "../../libc/include/stdio/stdio.h"
 #include "../errors/errors.h"
 #include "fs.h"
 #include "sfs.h"
 
+extern void dump_memory(void* ptr, size_t size);
+
 // Initialize the superblock by filling its contents with the 512 bytes from rootfs_start
-void init_sfs()
+void init()
 {
     /*
      * Copy over the first 512 bytes if memory from `rootfs_start` into the superblock structure
@@ -44,7 +47,7 @@ void init_sfs()
                 + (rootfs_superblock.data_area_size * BYTES_PER_BLOCKS);
     
     // Determine the total number of entries in the filesystem
-    total_entries = (rootfs_superblock.index_area_size / ENTRY_SIZE);
+    total_rootfs_entries = (rootfs_superblock.index_area_size / ENTRY_SIZE);
     
     // Count all files and folders in rootfs filesystem
     count_files_and_dirs();
@@ -54,24 +57,30 @@ void init_sfs()
  * Take in a filename and the mode (read, write, append) and return a FILE* type.
  */
 FILE* open(const char* filename /* , const char* mode */) // TODO: check mode and existence of file/folder
-{    
-    struct entry entries[total_entries];
-    char** entry_names = kmalloc(total_entries);
-
-    // Get a list of the names of all the entries in the filesystem
-    get_entry_names(entry_names, entries);
+{
+    // Get a list of every file with its filename in the filesystem
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_files);
+    get_entry_names(entry_names, entries, FILE_ENTRY);
 
     bool entry_found = false;
-    int cur_entry_index = 0;
+    unsigned int cur_entry_index = 0; // The index of the found entry in the list of entries (used for the offset)
 
-    /* Loop through the list of entry names and set `entry_found` to true
+    // The file entry containing the information about the file, if the file was found
+    struct file_entry file_ent;
+
+    /* Loop through the list of entries and set `entry_found` to true
      * if the requested filename matched the entry name.
      * Only allow the opening of files (no directories or deleted entries)
      */
-    for (unsigned int i=0; i<total_entries; i++) {
-        if (strcmp(entry_names[i], filename) == 0 && entries[i].type == FILE_ENTRY) {
-            entry_found = true;
-            cur_entry_index = i;
+    for (unsigned int i=0; i<(total_rootfs_entries); i++) {
+        // Check if the current entry is a file entry, so we can compare the passed in filename with the entry's filename
+        if (entries[i].type == FILE_ENTRY) {
+            if (strcmp((const char*) entries[i].entry.file_ent.filename, filename) == 0) {
+                file_ent = entries[i].entry.file_ent;
+                entry_found = true;
+                cur_entry_index = i;
+            }
         }
     }
 
@@ -79,10 +88,10 @@ FILE* open(const char* filename /* , const char* mode */) // TODO: check mode an
 
     // Create a FILE pointer and return it if an entry was found matching `filename`
     if (entry_found) {
-        FILE* fp = kmalloc(sizeof(FILE));
+        FILE* stream = kmalloc(sizeof(FILE));
 
         // Check if memory was allocated for the FILE pointer
-        if (fp == NULL) {
+        if (stream == NULL) {
             set_error(MEMORY_ALLOC_FAILED);
             return NULL;
         }
@@ -95,29 +104,18 @@ FILE* open(const char* filename /* , const char* mode */) // TODO: check mode an
         // Check if there are already the maximum number of opened files
         if (current_file_descriptor == MAX_OPEN_FILES)
             return NULL;
-        
-        // The file entry containing the information about the file
-        struct file_entry file = entries[cur_entry_index].entry.file_ent;
 
-        fp->fd = current_file_descriptor++;
-        fp->size = file.size;
-        fp->start_block = file.start_block;
-        fp->offset = index_start + (cur_entry_index * ENTRY_SIZE);
+        stream->size = file_ent.size;
+        stream->fd = current_file_descriptor++;
+        stream->start_block = file_ent.start_block;
+        stream->offset = index_start + (cur_entry_index * ENTRY_SIZE);
 
-        return fp;
+        return stream;
     }
     
     // An entry was not found matching `filename`
     return NULL;
 }
-
-// Close the file
-// TODO: implement
-void close()
-{
-}
-
-extern void dump_memory(void* ptr, size_t size);
 
 // Read from a file
 int read(FILE* stream, char* buf, size_t len)
@@ -151,13 +149,148 @@ int read(FILE* stream, char* buf, size_t len)
     }
 }
 
+// TODO: check if path is absolute or relative
+// TODO: check if file already exists
+// Create a new empty file on the filesystem with the name `filename`
+FILE* create(char* filename)
+{
+    // Check if the filename of the file to be created is valid. Replace NBSP characters with a space
+    if (!is_filename_valid(filename)) {
+        set_fs_error(INVALID_FILENAME);
+        return NULL;
+    }
+
+    make_full_path(filename);
+
+    // Get a list of all the files and their filenames in the filesystem
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_files);
+    get_entry_names(entry_names, entries, FILE_ENTRY);
+
+    // bool entry_found = false;
+
+    for (unsigned int i=0; i<(total_rootfs_dirs+total_rootfs_files); i++) {
+        if (strcmp(entry_names[i], filename) == 0)
+            return NULL;
+    }
+
+    uint64_t num_cont_entries = 0; // Has to match struct file_entry uint64_t
+
+    /*
+     * Calculate the number of continuation entries needed to store the filename.
+     * Subtract the length of the filename which will be stored in a file entry,
+     * and then divide that by the size of an entry and round it up
+     */
+    if (strlen(filename) > FILENAME_ENTRY_LEN-1) {
+        num_cont_entries = ceil((strlen(filename)-FILENAME_ENTRY_LEN-1) / ENTRY_SIZE);
+    }
+
+    // Create the file entry and set its information (it does not yet occupy any space in the data area)
+    struct file_entry file_ent;
+
+    file_ent.type = FILE_ENTRY;
+    file_ent.num_cont_entries = num_cont_entries;
+    file_ent.timestamp = 0; // TODO: change in future when time.h is working
+    file_ent.start_block = 0;
+    file_ent.end_block = 0;
+    file_ent.size = 0;
+
+    // A list of continuation entries containing the continued filename
+    struct continuation_entry cont_entries[num_cont_entries];
+
+    // The position in the string to starting reading from into the continuation entry name
+    unsigned int pos = FILENAME_ENTRY_LEN-1;
+
+    // Create a list of continuation entries that contain the filename's continued name
+    if (num_cont_entries > 0) {
+        // Copy the first part of the filename into the file entry structure
+        memcpy((char*) &file_ent.filename, filename, FILENAME_ENTRY_LEN-1);
+
+        for (unsigned int i=0; i<num_cont_entries; i++) {
+            // Create a new continuation entry struct and copy over the name into it
+            struct continuation_entry cont_entry;
+
+            strncpy((char*) cont_entry.name, &filename[pos], ENTRY_SIZE);
+            cont_entry.name[ENTRY_SIZE] = '\0';
+
+            memcpy(&cont_entries[i].name, &cont_entry.name, sizeof(cont_entry.name));
+
+            pos += ENTRY_SIZE + 1;
+        }
+    } else {
+        // Copy the first FILENAME_ENTRY_LEN bytes of the filename into the file entry structure
+        strcpy((char*) file_ent.filename, filename);
+    }
+
+    // Ensure there is enough memory to add the file entry, continuation entries and volume identifier entry
+    if ((unsigned int) rootfs_end+ENTRY_SIZE+(num_cont_entries*ENTRY_SIZE) <= available_memory) {
+        unsigned char* pos = rootfs_end - ENTRY_SIZE;
+
+        // Overwrite the volume identifier entry by copying the file entry in its place
+        memcpy(pos, &file_ent, ENTRY_SIZE);
+
+        pos += ENTRY_SIZE;
+
+        // Copy over the continuation entries, if any, into memory
+        if (num_cont_entries > 0) {
+            for (unsigned int i=0; i<num_cont_entries; i++) {
+                memcpy(pos, &cont_entries[i], ENTRY_SIZE);
+
+                pos += ENTRY_SIZE; // Advance to the next position to add the entry to
+            }
+        }
+
+        // Create a volume identifier entry to add after the newly created entries
+        struct volume_identifier_entry vol_entry;
+
+        vol_entry.type = VOLUME_IDENTIFIER_ENTRY;
+        memset(&vol_entry.reserved, 0, sizeof(vol_entry.reserved));
+        vol_entry.timestamp = 0; // TODO: change in future when time.h is working
+        strcpy((char*) vol_entry.volume_name, VOLUME_NAME);
+
+        // Add volume identifier entry to the end
+        memcpy(pos, &vol_entry, sizeof(vol_entry));
+
+        // Change `rootfs_end` to point to the end of the last entry created.
+        // file entry + continuation entries + volume identifier entry
+        rootfs_end = pos + ENTRY_SIZE;
+
+        // Recalculate the new size of the index area and total number of blocks set in the superblock
+        rootfs_superblock.index_area_size += ENTRY_SIZE + (num_cont_entries * ENTRY_SIZE);
+        rootfs_superblock.total_blocks = 1 + rootfs_superblock.data_area_size
+                + ceil(rootfs_superblock.index_area_size / BYTES_PER_BLOCKS);
+    } else {
+        set_error("Not enough memory");
+    }
+
+    // Increment the total number of entries (count) in the filesystem
+    total_rootfs_entries++;
+    total_rootfs_files++;
+
+    // Create a FILE stream for the file entry and return it
+    FILE* stream = kmalloc(sizeof(FILE));
+
+    // Set the file's attributes. The file's mode will be set in the call to fopen()
+    stream->size = 0;
+    stream->fd = current_file_descriptor++;
+    stream->eof = EOF;
+    stream->position = 0;
+    stream->start_block = 0;
+
+    // To determine the offset of the file, take the end of the filesystem, go back past the volume
+    // identifier entry and back to the beginning of the file entry (2 entries in total)
+    stream->offset = rootfs_end - (ENTRY_SIZE*2);
+
+    return stream;;
+}
+
 // Write to a file
 // TODO: implement
 void write()
 {
 }
 
-// Open a directory for reading
+// Open a directory for reading and return a structure containing information about it
 // TODO: implement
 void opendir()
 {
@@ -169,18 +302,31 @@ void readdir()
 {
 }
 
-// Mount the filesystem
-// TODO: implement
-void mount()
+// Change the current working directory
+int change_dir(char* dirname)
 {
-    printf("Mounting SFS filesystem as rootfs...");
-}
+    // Get a list of all the files and their filenames in the filesystem
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_files);
+    get_entry_names(entry_names, entries, DIRECTORY_ENTRY);
 
-// Unmount the filesystem
-// TODO: implement
-void umount()
-{
-    printf("Unmounting SFS filesystem...");
+    // Go through all the directories and check if there exists a directory by `dirname`
+    // TODO: only allow changing to directories: modify get_entry_names
+    for (unsigned int i=0; i<(total_rootfs_dirs+total_rootfs_files); i++) {
+        if (strcmp(entry_names[i], dirname) == 0) {
+            strcpy(current_dir, dirname);
+            current_dir[strlen(current_dir)] = '\0';
+
+            kfree(entry_names);
+
+            return 0;
+        }
+    }
+
+    kfree(entry_names);
+
+    // Failed to find a directory by `dirname`
+    return -1;
 }
 
 // Given an offset to the start of an entry, find and return the entry's name
@@ -251,7 +397,7 @@ void find_all_entries(struct entry entries[])
         uint8_t entry_name_offset;
         uint64_t timestamp;
 
-        while (cur_entry < (total_entries)) { // total_entries-1
+        while (cur_entry < (total_rootfs_entries)) { // total_entries-1
             // Determine the type of the entry and the number of continuation entries that follow it
             entry_type = *pos;
             num_cont_entries = *(pos+1);
@@ -267,6 +413,14 @@ void find_all_entries(struct entry entries[])
                     entry_name_len = FILENAME_ENTRY_LEN;
                     entry_name_offset = FILENAME_OFFSET;
                     break;
+                  case DELETED_DIRECTORY_ENTRY:
+                    entry_name_len = DIRECTORY_NAME_ENTRY_LEN;
+                    entry_name_offset = DIRECTORY_NAME_OFFSET;
+                    break;
+                case DELETED_FILE_ENTRY:
+                    entry_name_len = FILENAME_ENTRY_LEN;
+                    entry_name_offset = FILENAME_OFFSET;
+                    break;
             }
             
             // Store the name of the entry (for directories and files)
@@ -279,6 +433,7 @@ void find_all_entries(struct entry entries[])
             if (entry_type == DIRECTORY_ENTRY) {
                 struct directory_entry dir_ent;
 
+                // Set the directory entry's information
                 dir_ent.type = DIRECTORY_ENTRY;
                 dir_ent.num_cont_entries = num_cont_entries;
                 dir_ent.timestamp = timestamp;
@@ -291,6 +446,7 @@ void find_all_entries(struct entry entries[])
             } else if (entry_type == FILE_ENTRY) {
                 struct file_entry file_ent;
 
+                // Set the file entry's information
                 file_ent.type = FILE_ENTRY;
                 file_ent.num_cont_entries = num_cont_entries;
                 file_ent.timestamp = timestamp;
@@ -303,8 +459,34 @@ void find_all_entries(struct entry entries[])
                 // Add the file entry to the list of entries
                 entries[cur_entry].type = FILE_ENTRY;
                 entries[cur_entry].entry.file_ent = file_ent;
+            } else if (entry_type == DELETED_DIRECTORY_ENTRY) {
+                struct deleted_directory_entry del_dir_ent;
 
-                // printf("__start_block=%d     ", entries[cur_entry].entry.file_ent.start_block);
+                // Set the deleted directory entry's information
+                del_dir_ent.type = DELETED_DIRECTORY_ENTRY;
+                del_dir_ent.num_cont_entries = num_cont_entries;
+                del_dir_ent.timestamp = timestamp;
+                memset(&del_dir_ent.reserved, 0, sizeof(del_dir_ent.reserved));
+
+                // Add the directory entry to the list of entries
+                entries[cur_entry].type = DELETED_DIRECTORY_ENTRY;
+                entries[cur_entry].entry.del_dir_ent = del_dir_ent;
+            } else if (entry_type == DELETED_FILE_ENTRY) {
+                struct deleted_file_entry del_file_ent;
+
+                // Set the deleted file entry's information
+                del_file_ent.type = DELETED_FILE_ENTRY;
+                del_file_ent.num_cont_entries = num_cont_entries;
+                del_file_ent.timestamp = timestamp;
+                del_file_ent.start_block = *(pos+10);
+                del_file_ent.end_block = *(pos+18);
+                del_file_ent.size = *(pos+26);
+
+                strncpy((char*) del_file_ent.filename, (const char*) name, sizeof(name));
+
+                // Add the file entry to the list of entries
+                entries[cur_entry].type = DELETED_FILE_ENTRY;
+                entries[cur_entry].entry.del_file_ent = del_file_ent;
             }
 
             cur_entry++;
@@ -330,8 +512,10 @@ void find_all_entries(struct entry entries[])
     }
 }
 
-// Get a list of names of all the entries in the filesystemm
-void get_entry_names(char** entry_names, struct entry entries[])
+// Get a list of names of all the entries in the filesystem
+// TODO: count files/folders/deleted files + folders in filesystem and
+//     : check `_entry_type` to determine the size of the `entry_names` array
+void get_entry_names(char** entry_names, struct entry entries[], int _entry_type)
 {
     int i = 0; // Keep track of the name of the current entry to add to the array
 
@@ -342,7 +526,7 @@ void get_entry_names(char** entry_names, struct entry entries[])
     struct entry cur_entry;
     uint8_t entry_type;
 
-    for (unsigned int j=0; j<total_entries; j++) {
+    for (unsigned int j=0; j<total_rootfs_entries; j++) {
         uint8_t num_cont_entries = 0;
         uint8_t entry_name_len = 0;
         
@@ -351,13 +535,25 @@ void get_entry_names(char** entry_names, struct entry entries[])
 
         /*
          * Determine the number of continuation entries for the current entry.
-         * Determine the length of the entry's name (applicable to files and folders only)
+         * Determine the length of the entry's name
          */
-        if (entry_type == DIRECTORY_ENTRY) {
+        // Directory entry
+        if ((_entry_type & DIRECTORY_ENTRY) == DIRECTORY_ENTRY) {
             num_cont_entries = cur_entry.entry.dir_ent.num_cont_entries;
             entry_name_len = DIRECTORY_NAME_ENTRY_LEN;
-        } else if (entry_type == FILE_ENTRY) {
+        }
+        // File entry
+        if ((_entry_type & FILE_ENTRY) == FILE_ENTRY) {
             num_cont_entries = cur_entry.entry.file_ent.num_cont_entries;
+            entry_name_len = FILENAME_ENTRY_LEN;
+        }
+        // Deleted directory entry
+        if ((_entry_type & DELETED_DIRECTORY_ENTRY) == DELETED_DIRECTORY_ENTRY) {
+            num_cont_entries = cur_entry.entry.del_dir_ent.num_cont_entries;
+        }
+        // Deleted file entry
+        if ((_entry_type & DELETED_FILE_ENTRY) == DELETED_FILE_ENTRY) {
+            num_cont_entries = cur_entry.entry.del_file_ent.num_cont_entries;
             entry_name_len = FILENAME_ENTRY_LEN;
         }
 
@@ -371,14 +567,15 @@ void get_entry_names(char** entry_names, struct entry entries[])
             return;
         }
 
-        // Copy the entry name in to the `name` pointer
-        if (entry_type == DIRECTORY_ENTRY) {
+        // Copy the entry name in to the `name` array.
+        // Deleted directory entries do not have a name
+        if ((_entry_type & DIRECTORY_ENTRY) == DIRECTORY_ENTRY) {
             strncpy(name, (const char*) cur_entry.entry.dir_ent.name, sizeof(cur_entry.entry.dir_ent.name));
-        } else if (entry_type == FILE_ENTRY) {
+        } else if ((_entry_type & FILE_ENTRY) == FILE_ENTRY) {
             strncpy(name, (const char*) cur_entry.entry.file_ent.filename, sizeof(cur_entry.entry.dir_ent.name));
+        } else if ((_entry_type & DELETED_FILE_ENTRY) == DELETED_FILE_ENTRY) {
+            strncpy(name, (const char*) cur_entry.entry.del_file_ent.filename, sizeof(cur_entry.entry.del_file_ent.filename));
         }
-
-        name[name_len] = '\0'; // Add the null byte to the end of the string
 
         /*
          * If there are continuation entries following the current entry,
@@ -395,31 +592,36 @@ void get_entry_names(char** entry_names, struct entry entries[])
                 cont_name[ENTRY_SIZE] = '\0';
                 
                 strncat(name, cont_name, sizeof(cont_name));
-
-                // Skip over the continuation entries, since they were not added
-                // to the array of entry names, but only concatenated on
-                i++;
             }
         }
 
+        name[name_len] = '\0'; // Add the null byte to the end of the string
+
         // Add the name of the entry to the array
-        entry_names[i++] = name;
+        if (((_entry_type & DIRECTORY_ENTRY) == DIRECTORY_ENTRY && entry_type == DIRECTORY_ENTRY)
+            || ((_entry_type & FILE_ENTRY) == FILE_ENTRY && entry_type == FILE_ENTRY)
+            || ((_entry_type & DELETED_FILE_ENTRY) == DELETED_FILE_ENTRY && entry_type == DELETED_FILE_ENTRY)) {
+            
+            entry_names[i++] = name;
+        }
 
         // Skip over all the continuation entries to avoid reading them again.
         j += (num_cont_entries);
+
+        kfree(name);
     }
 }
 
 // Get a count of all the files and directories currently in the filesystem
 void count_files_and_dirs()
 {
-    struct entry entries[total_entries];
+    struct entry entries[total_rootfs_entries];
 
     // Get a list of the names of all the entries in the filesystem
     find_all_entries(entries);
 
     // Loop through all the entries in the filesystem and determine if each entry is a file or folder
-    for (unsigned int i=0; i<total_entries; i++) {
+    for (unsigned int i=0; i<total_rootfs_entries; i++) {
         switch (entries[i].type) {
             case DIRECTORY_ENTRY:
                 total_rootfs_dirs++;
@@ -429,4 +631,38 @@ void count_files_and_dirs()
                 break;
         }
     }
+}
+
+// Determine whether the filename contains invalid characters or if it is valid
+bool is_filename_valid(char* filename)
+{
+    /* 
+     * Check for any invalid characters in the filename.
+     * Invalid characters are:
+     *   control characters (< 0x20)
+     *   " (0x22)
+     *   * (0x2A)
+     *   : (0x3A)
+     *   < (0x3C)
+     *   > (0x3E)
+     *   ? (0x3F)
+     *   \ (0x5C)
+     *   DEL (0x7F)
+     *   NBSP (0xA0, replaced with a space)
+     */
+    for (unsigned int i=0; i<strlen(filename); i++) {
+        unsigned char c = filename[i];
+
+        // List of invalid characters. Return NULL
+        if (c < 0x20 || c == '"' || c == '*' || c == ':' || c == '<' || c == '>'
+                || c == '?' || c == '\\' || c == 0x7F) {
+
+            return false;
+        // Replace no break space character (NBSP) with a space
+        } else if (c == 0xA0) {
+            filename[i] = ' ';
+        }
+    }
+
+    return true;
 }
