@@ -1,27 +1,26 @@
 #include "shell.h"
-#include "../../libc/include/stdio/stdio.h"
 
-extern void* kmalloc(size_t size);
-extern void* krealloc(void* ptr, size_t size);
-extern int kprintf(const char* fmt, ...);
-
-typedef struct fn_table_entry {
-	char* name;
+typedef struct fn_table_entry
+{
+	char *name;
 	void (*fn)();
 } fn_table_entry_t;
 
 // A list of shell commands with their corresponding functions to be called when the command is entered
 fn_table_entry_t fn_table[] = {
-							   {"help", xsh_help},
-							   {"echo", xsh_echo},
-							   {"exit", xsh_exit},
-							   {"clear", xsh_clear_screen},
-							   {"cat", xsh_cat},
-							   {"touch", xsh_touch},
-							   {"cd", xsh_cd},
-							  };
+	{"help", xsh_help},
+	{"echo", xsh_echo},
+	{"exit", xsh_exit},
+	{"clear", xsh_clear_screen},
+	{"cat", xsh_cat},
+	{"touch", xsh_touch},
+	{"cd", xsh_cd},
+	{"ls", xsh_ls},
+	{"pwd", xsh_pwd},
+	{"rm", xsh_rm},
+};
 
-char* builtin_commands[] = {
+char *builtin_commands[] = {
 	"help",
 	"echo",
 	"exit",
@@ -29,12 +28,17 @@ char* builtin_commands[] = {
 	"cat",
 	"touch",
 	"cd",
+	"ls",
+	"pwd",
+	"rm",
 };
 
 void (*fn_lookup(char *fname))()
 {
-	for (unsigned int i=0; i<sizeof(fn_table)/sizeof(fn_table[0]); i++) {
-		if (strcmp(fname, fn_table[i].name) == 0) {
+	for (unsigned int i = 0; i < sizeof(fn_table) / sizeof(fn_table[0]); i++)
+	{
+		if (strcmp(fname, fn_table[i].name) == 0)
+		{
 			return fn_table[i].fn;
 		}
 	}
@@ -44,36 +48,41 @@ void (*fn_lookup(char *fname))()
 
 void shell()
 {
-	// TODO: change kprintf('dir$ ') to the format `user@host:dir$ `
+	// TODO: change kprintf('dir$ ') to the format `user@pc-name:dir$ `
 	// future TODO: check if user is root and so change "$" to "#"
 
-	char* line;
-	char** args;
+	char *line;
+	char **args;
 
 	kprintf("%s$ ", current_dir);
 
 	line = read_line();
 
-	if (strcmp(line, "") != 0) {
+	if (strcmp(line, "") != 0)
+	{
 		args = split_line(line);
 
-		for (unsigned int i=0; i<sizeof(builtin_commands)/sizeof(builtin_commands[0]); i++) {
-			if (strcmp(args[0], builtin_commands[i]) == 0) {
+		for (unsigned int i = 0; i < sizeof(builtin_commands) / sizeof(builtin_commands[0]); i++)
+		{
+			if (strcmp(args[0], builtin_commands[i]) == 0)
+			{
 				fn_lookup(args[0])(args);
 
 				// Do not print an extra new line if the terminal screen was cleared
-				if (strcmp(args[0], "clear") != 0) {
-					kprintf("\n");
+				if (strcmp(args[0], "clear") != 0)
+				{
+					// kprintf("\n");
 				}
 
 				return;
-			} else if (i == sizeof(builtin_commands)/sizeof(builtin_commands[0])-1) {
+			}
+			else if (i == sizeof(builtin_commands) / sizeof(builtin_commands[0]) - 1)
+			{
 				// TODO: check if command is name of program and start a process
 				kprintf("Unknown command. Try \"help\" for a list of commands\n");
 
 				return;
 			}
-
 		}
 
 		kfree(args);
@@ -82,31 +91,37 @@ void shell()
 	kfree(line);
 }
 
-char* read_line()
+char *read_line()
 {
 	int buffer_size = BUF_SIZE;
-	char* buffer = kmalloc(buffer_size);
+	char *buffer = kmalloc(buffer_size);
 	int c;
 	index = 0;
 
-	if (!buffer) {
+	if (!buffer)
+	{
 		kprintf("Failed to allocate memory!");
 		// exit(EXIT_FAILURE);
 	}
 
-	while (1) {
+	while (1)
+	{
 		c = getchar();
 
-		if (c == '\n') {
+		if (c == '\n')
+		{
 			buffer[index++] = '\0';
 			return buffer;
-		} else if (c != 0x08) {
+		}
+		else if (c != 0x08)
+		{
 			buffer[index++] = c;
 		}
 
-		if (index >= buffer_size) {
+		if (index >= buffer_size)
+		{
 			buffer_size += BUF_SIZE;
-			buffer = (char*) krealloc(buffer, buffer_size);
+			buffer = (char *)krealloc(buffer, buffer_size);
 
 			if (!buffer)
 				kprintf("Failed to allocate memory!");
@@ -116,7 +131,7 @@ char* read_line()
 	// return buffer;
 }
 
-char** split_line(char* line)
+char **split_line(char *line)
 {
 	unsigned int i = 0; // The current position within the `args` array
 
@@ -124,16 +139,18 @@ char** split_line(char* line)
 	num_args = 0; // Reset the number of arguments for each command
 
 	// Determine the number of spaces in the line so that we know how much memory to allocate
-	for (unsigned int i=0; i<strlen(line); i++) {
+	for (unsigned int i = 0; i < strlen(line); i++)
+	{
 		if (line[i] == ' ')
 			num_spaces++;
 	}
 
 	// Allocate memory for the number of arguments
-	char** args = kcalloc(num_spaces+1, 1);
-	char* arg; 
+	char **args = kcalloc(num_spaces + 1, 1);
+	char *arg;
 
-	if (!args) {
+	if (!args)
+	{
 		kprintf("Failed to allocate memory!");
 		// exit(EXIT_FAILURE);
 	}
@@ -143,7 +160,8 @@ char** split_line(char* line)
 	 */
 	arg = strtok(line, TOK_DELIM);
 
-	while (arg != NULL) {
+	while (arg != NULL)
+	{
 		args[i++] = arg;
 		arg = strtok(NULL, TOK_DELIM); // Get the next argument
 		num_args++;
@@ -163,16 +181,20 @@ void xsh_help()
 		"exit:  exits the shell (or OS if this is the only shell)\n"
 		"clear: clears the screen\n"
 		"cat:   display the contents of a file\n"
-		"touch: create a new file\n"
-		"cd:    change the current working directory"
-	);
+		"touch: create a new file (not yet implemented)\n"
+		"cd:    change the current working directory\n"
+		"ls:    list the contents of a directory\n"
+		"pwd:   display the current working directory\n"
+		"rm:    remove a file\n");
 }
 
 // Prints the output after the "echo" command
-void xsh_echo(char** args)
+void xsh_echo(char **args)
 {
-	for (unsigned int i=1; i<num_args; i++) {
-		if (args[i] != NULL) {
+	for (unsigned int i = 1; i < num_args; i++)
+	{
+		if (args[i] != NULL)
+		{
 			kprintf("%s ", args[i]);
 		}
 	}
@@ -184,7 +206,6 @@ void xsh_exit()
 	kprintf("Exit requested!");
 }
 
-
 // Clears the screen
 void xsh_clear_screen()
 {
@@ -192,26 +213,27 @@ void xsh_clear_screen()
 }
 
 // Display the contents of a file
-void xsh_cat(char** args)
+void xsh_cat(char **args)
 {
 	// The name of the file to read
-	char* filename = args[1];
+	char *filename = args[1];
 
 	// Attempt to open a file stream with the given filename
-	FILE* fp = fopen(filename, "r");
+	FILE *fp = fopen(filename, "r");
 
-	if (fp == NULL) {
+	if (fp == NULL)
+	{
 		kprintf("cat: %s: no such file", filename);
 
 		return;
 	}
-	
+
 	// The file is valid. So read its contents
-	char buffer[fp->size+1];
+	char buffer[fp->size + 1];
 
 	fread(buffer, sizeof(buffer), 1, fp);
 
-	buffer[fp->size+1] = '\0';
+	buffer[fp->size + 1] = '\0';
 
 	kprintf("%s\n", buffer);
 
@@ -226,17 +248,66 @@ void xsh_touch(/*char** args*/)
 }
 
 // Change the current working directory
-void xsh_cd(char** args)
+void xsh_cd(char **args)
 {
 	// Get the directory name to change to
-	char* dirname = args[1];
+	char *dirname = args[1];
 
 	// Only attempt to change the directory if the user specified a directory
-	if (strcmp(dirname, "") != 0) {
+	if (strcmp(dirname, "") != 0)
+	{
 		// result=-1 means failed to find directory matching `dirname`
-		int result = vfs_change_dir(dirname);
+		int result = vfs_changedir(dirname);
 
 		if (result == -1)
 			kprintf("cd: %s: no such directory", dirname);
+	}
+}
+
+// List the contents of the current directory
+// TODO: check for no args[1] specified
+void xsh_ls(char **args)
+{
+	char *dirname = args[1];
+
+	DIR *dir = opendir(dirname);
+
+	if (dir == NULL)
+	{
+		kprintf("ls: cannot access '%s': no such directory", dirname);
+		return;
+	}
+
+	struct dirent *dirent;
+
+	// Print out each entry name in the directory
+	while ((dirent = readdir(dir)))
+	{
+		kprintf("%s ", dirent->name);
+	}
+
+	// kprintf("\n\n\n");
+
+	closedir(dir);
+}
+
+// Display the current working directory
+void xsh_pwd()
+{
+	kprintf("%s", current_dir);
+}
+
+// Remove a file from the filesystem
+void xsh_rm(char **args)
+{
+	char *filename = args[1];
+
+	if (!vfs_rm(filename))
+	{
+		kprintf("rm: %s: file does not exist\n", filename);
+	}
+	else
+	{
+		kprintf("File removal in process...");
 	}
 }

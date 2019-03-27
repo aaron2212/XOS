@@ -11,13 +11,13 @@
 
 // TODO: move all kprintf() status messages to the appropriate functions
 
-void k_main(void* mb_struct)
+void k_main(void *mb_struct)
 {
 	terminal_init();
 	kprintf("XOS booting...\n\n");
 
 	// Store multiboot information in a structure
-	multiboot_info_t* mbinfo = (multiboot_info_t*) mb_struct;
+	multiboot_info_t *mbinfo = (multiboot_info_t *)mb_struct;
 
 	/*
 	 * Determine the amount of memory available and set aside a percent of memory for the heap.
@@ -33,9 +33,12 @@ void k_main(void* mb_struct)
 	 * Initialize and setup the root filesystem
 	 */
 	kprintf("Initializing the root filesystem... ");
-	if (init_fs(mbinfo) != 0) {
+	if (init_fs(mbinfo) != 0)
+	{
 		kprintf("Failed to initialize filesystem: %s\n\n", get_last_error());
-	} else {
+	}
+	else
+	{
 		kprintf("OK\n");
 		is_fs_loaded = true;
 	}
@@ -51,31 +54,31 @@ void k_main(void* mb_struct)
 	//init_timer(); /* not working */
 	init_keyboard();
 	kprintf("OK\n\n");
-	
+
 	// Status information
 	kprintf("Kernel ends at address 0x%x\n", kernel_end);
-	kprintf("Installed memory (RAM): %dMB\n", (available_memory/1024/1024));
-	kprintf("Heap size: %dMB\n", (heap_size/1024/1024)); // Convert heap size to megabytes
+	kprintf("Installed memory (RAM): %dMB\n", (available_memory / 1024 / 1024));
+	kprintf("Heap size: %dMB\n", (heap_size / 1024 / 1024)); // Convert heap size to megabytes
 
 	// If the filesystem was loaded successfully (enough memory, mounted filesystem etc)
 	if (is_fs_loaded)
-		kprintf("Filesystem loaded at address 0x%x: %d directories, %d files\n", 
+		kprintf("Filesystem loaded at address 0x%x: %d directories, %d files\n",
 				rootfs_start, total_rootfs_dirs, total_rootfs_files);
 	else
 		kprintf("Could not load filesystem: %s\n", get_last_error());
 
-	struct entry entries[total_rootfs_entries];
+	DIR *dir = opendir("/");
+	struct dirent *dirent;
 
-	char** entry_names = kcalloc(total_rootfs_entries, 1);
-	get_entry_names(entry_names, entries, DIRECTORY_ENTRY);
-
-	for (unsigned int i=0; i<total_rootfs_dirs; i++) {
-		kprintf("%s  ", entry_names[i]);
+	while ((dirent = readdir(dir)))
+	{
+		kprintf("f=%s  ", dirent->name);
 	}
 
-	kfree(entry_names);
+	closedir(dir);
 
-	while (1) {
+	while (1)
+	{
 		shell();
 	}
 }

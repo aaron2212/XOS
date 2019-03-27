@@ -14,15 +14,16 @@ extern unsigned int kernel_end;
 extern unsigned int available_memory;
 extern unsigned int heap_size;
 
-unsigned char* pos = (unsigned char*) 1024; // The beginning position of memory to allocate
+unsigned char *pos = (unsigned char *)1024; // The beginning position of memory to allocate
 
-void* kmalloc(size_t size)
+void *kmalloc(size_t size)
 {
-    // If the user requested a size of 0, return a NULL pointer.
-	// If the heap is full, return a NULL pointer
-    if (size == 0) {
-        return (void*) NULL;
-    }
+	// If the user requested a size of 0, return a NULL pointer.
+	// TODO: If the heap is full, return a NULL pointer
+	if (size == 0)
+	{
+		return (void *)NULL;
+	}
 
 	// TODO: implement
 	// WARNING: breaks os
@@ -33,8 +34,8 @@ void* kmalloc(size_t size)
 	// 	return (void*) NULL;
 	// }
 
-    if (pos == 0)
-        pos = (unsigned char*) kernel_end + 1;
+	if (pos == 0)
+		pos = (unsigned char *)kernel_end + 1;
 
 	bool block_found = false;
 
@@ -47,28 +48,28 @@ void* kmalloc(size_t size)
 	{
 		/* If the allocated bit is not set, set it and store the number of blocks needed as a short */
 		if (*pos != 1)
-        {
+		{
 			*pos = 1;
 
 			/* calculate the number of blocks needed based on the requested size, and the store i
              * if the size requested is a multiple of BLOCK_SIZE, the do not round up the number
              * of blocks needed, otherwise round it up
              */
-            unsigned int blocks_needed = (size % 4096 == 0) ? (size/4096) : ceil(size/4096);
+			unsigned int blocks_needed = (size % 4096 == 0) ? (size / 4096) : ceil(size / 4096);
 
-			*(pos+1) = blocks_needed;
+			*(pos + 1) = blocks_needed;
 
 			/* we have found a block, exit the loop */
 			block_found = true;
-        }
+		}
 		else
-        {
+		{
 			/* retrieve the number of allocated blocks */
-			unsigned int blocks_allocated = *(pos+1);
+			unsigned int blocks_allocated = *(pos + 1);
 
 			/* increase pos by the number of allocated blocks * BLOCK_SIZE */
-			pos += (blocks_allocated*BLOCK_SIZE) + 5;
-        }
+			pos += (blocks_allocated * BLOCK_SIZE) + 5;
+		}
 	}
 
 	/* returns a pointer to the beginning of the block (after header) */

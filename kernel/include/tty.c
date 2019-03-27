@@ -11,37 +11,42 @@ void terminal_init()
 {
 	terminal_color = make_color(COLOR_WHITE, COLOR_BLUE);
 
-    char* vidmem = (char*) 0xB8000;
-    unsigned int i = 0;
+	char *vidmem = (char *)0xB8000;
+	unsigned int i = 0;
 
-    while (i < (80 * 25 * 2)) {
-        vidmem[i++] = ' ';
-        vidmem[i++] = terminal_get_color();
-    }
+	while (i < (80 * 25 * 2))
+	{
+		vidmem[i++] = ' ';
+		vidmem[i++] = terminal_get_color();
+	}
 
-    move_cursor(0, 0);
+	move_cursor(0, 0);
 }
 
 // Write a character to the screen
 void terminal_putchar(char c)
 {
-	char* vidmem = (char*) 0xB8000;
+	char *vidmem = (char *)0xB8000;
 
 	// '\n' sends cursor to beginning of next line
-	if (c == '\n') {
+	if (c == '\n')
+	{
 		x = 0;
 		y += 2;
-    } else {
-        unsigned int i = y * VGA_WIDTH + x;
+	}
+	else
+	{
+		unsigned int i = y * VGA_WIDTH + x;
 
-        vidmem[i] = c;
-		move_cursor(x+1, y);
+		vidmem[i] = c;
+		move_cursor(x + 1, y);
 		i++;
 		vidmem[i] = terminal_get_color();
-		move_cursor(x+1, y);
-    }
+		move_cursor(x + 1, y);
+	}
 
-	if (y > 48) {
+	if (y > 48)
+	{
 		terminal_scroll();
 
 		y -= 2;
@@ -49,21 +54,23 @@ void terminal_putchar(char c)
 }
 
 // Write a string to the screen
-void terminal_write(char* str)
+void terminal_write(char *str)
 {
-    for (unsigned int i=0; i<strlen(str); i++) {
-        terminal_putchar(str[i]);
-    }
+	for (unsigned int i = 0; i < strlen(str); i++)
+	{
+		terminal_putchar(str[i]);
+	}
 }
 
 // Scoll the screen by one line
 void terminal_scroll()
 {
-	char* vidmem = (char*) 0xB8000;
+	char *vidmem = (char *)0xB8000;
 	unsigned int i = 0;
 
-	while (i < (80 * 25 * 2)) {
-		vidmem[i-80*2] = vidmem[i];
+	while (i < (80 * 25 * 2))
+	{
+		vidmem[i - 80 * 2] = vidmem[i];
 		i++;
 	}
 }
@@ -71,11 +78,12 @@ void terminal_scroll()
 // Clear the entire screen
 void terminal_clear_screen()
 {
-	char* vidmem = (char*) 0xB8000;
+	char *vidmem = (char *)0xB8000;
 
 	unsigned int i = 0;
 
-	while (i < (80*25*2)) {
+	while (i < (80 * 25 * 2))
+	{
 		vidmem[i++] = 0;
 		vidmem[i++] = terminal_get_color();
 	}
@@ -87,7 +95,6 @@ void terminal_clear_screen()
 int get_cursor_x()
 {
 	return x;
-
 }
 
 // Get the current Y position of the cursor
