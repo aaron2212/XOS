@@ -7,15 +7,19 @@ LDFLAGS := -T link.ld -m elf_i386
 AS	:= nasm
 ASFLAGS := -f elf
 
-all: boot kernel run
+all: prepare boot _kernel run
+
+prepare:
+	@clear
+	@mkdir -p lib
+	@mkdir -p objs
 
 boot:
-	@clear
 	@$(AS) $(ASFLAGS) boot.asm
 	@$(AS) $(ASFLAGS) include/io.s
 	@mv include/io.o lib/io.o
 
-kernel: $(OBJECTS)
+_kernel:
 	@$(CC) $(CFLAGS) kernel/kernel/kernel.c			-o kernel.o
 	@$(CC) $(CFLAGS) kernel/debug/dump_memory.c		-o objs/dump_memory.o
 	@$(CC) $(CFLAGS) kernel/include/kbd.c			-o lib/kbd.o

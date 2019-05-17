@@ -2,6 +2,7 @@ iso/*
 lib/*
 objs/*
 testing/*
-*.o
+# *.o
 TODO
 count_os_lines.sh
+.vscode/
