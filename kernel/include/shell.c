@@ -19,6 +19,8 @@ fn_table_entry_t fn_table[] = {
     {"pwd", xsh_pwd},
     {"rm", xsh_rm},
     {"rmdir", xsh_rmdir},
+    {"hostname", xsh_hostname},
+    {"login", xsh_login},
 };
 
 char* builtin_commands[] = {
@@ -33,6 +35,8 @@ char* builtin_commands[] = {
     "pwd",
     "rm",
     "rmdir",
+    "hostname",
+    "login",
 };
 
 void (*fn_lookup(char* fname))() {
@@ -51,7 +55,11 @@ void shell() {
     char* line;
     char** args;
 
-    kprintf("@%s:%s$ ", get_hostname(), current_dir);
+    struct user current_user = get_current_user();
+
+    char prompt = strcmp(current_user.username, "root") == 0 ? '#' : '$';
+
+    kprintf("%s@%s:%s%c ", current_user.username, get_hostname(), current_dir, prompt);
 
     line = read_line();
 
@@ -290,5 +298,36 @@ void xsh_rmdir(char** args) {
 
     if (!vfs_rmdir(dirname)) {
         kprintf("rmdir: failed to remove '%s': no such directory\n", dirname);
+    }
+}
+
+// Get the hostname for the system
+void xsh_hostname() {
+    kprintf("%s\n", get_hostname());
+}
+
+// Login as a different user
+void xsh_login() {
+    char* username = kmalloc(MAX_USERNAME_LENGTH);
+    char* password = kmalloc(MAX_PASSWORD_LENGTH);
+
+    bool login_success = false;
+
+    while (!login_success) {
+        kprintf("Username: ");
+        gets(username);
+
+        kprintf("Password: ");
+        gets(password);
+
+        for (unsigned int i = 0; i < total_user_count; i++) {
+            if (strcmp(users[i].username, username) == 0 && strcmp(users[i].password, password) == 0) {
+                login_success = true;
+                set_current_user(users[i]);
+            }
+        }
+
+        if (!login_success)
+            kprintf("Login incorrect\n");
     }
 }

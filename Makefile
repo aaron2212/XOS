@@ -62,6 +62,7 @@ _kernel:
 	@$(CC) $(CFLAGS) libc/include/stdio/fclose.c	-o lib/fclose.o
 	@$(CC) $(CFLAGS) libc/include/stdio/fgets.c	-o lib/fgets.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/itoa.c		-o lib/itoa.o
+	@$(CC) $(CFLAGS) libc/include/stdlib/atoi.c		-o lib/atoi.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kmalloc.c	-o lib/kmalloc.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kcalloc.c	-o lib/kcalloc.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kfree.c	-o lib/kfree.o

@@ -42,5 +42,7 @@ void xsh_ls(char** args);
 void xsh_pwd();
 void xsh_rm(char** args);
 void xsh_rmdir(char** args);
+void xsh_hostname();
+void xsh_login();
 
 #endif

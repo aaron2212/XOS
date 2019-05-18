@@ -67,8 +67,6 @@ void k_main(void* mb_struct) {
     // Initialize system configurations
     init_system();
 
-    kprintf("users[0].username=%s\n", users[0].username);
-
     while (1) {
         shell();
     }

@@ -22,10 +22,14 @@ struct user {
 
 char* hostname;
 struct user users[MAX_USERS];
+unsigned int total_user_count;
+struct user current_user;
 
 void init_system();
 void init_users();
 char* get_hostname();
+struct user get_current_user();
+bool set_current_user(struct user current_user);
 
 extern FILE* fopen(char* filename, const char* mode);
 extern int fread(void* buffer, size_t size, size_t count, FILE* stream);
