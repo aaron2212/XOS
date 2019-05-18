@@ -6,6 +6,7 @@
 #include "../include/shell.c"
 #include "../include/tty.c"
 #include "../modules/modules.c"
+#include "../system/system.h"
 
 /* main part of kernel code */
 
@@ -63,7 +64,8 @@ void k_main(void* mb_struct) {
     else
         kprintf("Could not load filesystem: %s\n", get_last_error());
 
-    FILE* fp = vfs_create("/myfile");
+    // Initialize system configurations
+    init_system();
 
     while (1) {
         shell();

@@ -27,6 +27,8 @@ _kernel:
 	@$(CC) $(CFLAGS) kernel/fs/sfs.c				-o objs/sfs.o
 	@$(CC) $(CFLAGS) kernel/fs/fs.c					-o objs/fs.o
 	@$(CC) $(CFLAGS) kernel/errors/errors.c			-o objs/errors.o
+	@$(CC) $(CFLAGS) kernel/system/system.c			-o objs/system.o
+	@$(CC  $(CFLAGS) kernel/system/users.c			-o objs/users.o
 	@$(CC) $(CFLAGS) include/gdt/gdt.c				-o objs/gdt.o
 	@$(CC) $(CFLAGS) include/idt/idt.c				-o objs/idt.o
 	@$(CC) $(CFLAGS) include/isr_irq/isrs.c			-o objs/isrs.o

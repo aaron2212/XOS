@@ -1,4 +1,5 @@
 #include "shell.h"
+#include "../system/system.h"
 
 typedef struct fn_table_entry {
     char* name;
@@ -50,7 +51,7 @@ void shell() {
     char* line;
     char** args;
 
-    kprintf("%s$ ", current_dir);
+    kprintf("@%s:%s$ ", get_hostname(), current_dir);
 
     line = read_line();
 
