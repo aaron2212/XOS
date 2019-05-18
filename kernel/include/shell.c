@@ -70,7 +70,7 @@ void shell() {
                 return;
             } else if (i == sizeof(builtin_commands) / sizeof(builtin_commands[0]) - 1) {
                 // TODO: check if command is name of program and start a process
-                kprintf("Unknown command. Try \"help\" for a list of commands\n");
+                kprintf("%s: command not found\n", args[0]);
 
                 return;
             }

@@ -15,9 +15,9 @@
 // sizeof(struct user) = 766
 struct user {
     uint8_t uid;
-    uint8_t name[MAX_USERNAME_LENGTH];
-    uint8_t password[MAX_PASSWORD_LENGTH];
-    uint8_t home_dir[MAX_HOMEDIR_LENGTH];
+    int8_t username[MAX_USERNAME_LENGTH];
+    int8_t password[MAX_PASSWORD_LENGTH];
+    int8_t home_dir[MAX_HOMEDIR_LENGTH];
 };
 
 char* hostname;
@@ -30,6 +30,5 @@ char* get_hostname();
 extern FILE* fopen(char* filename, const char* mode);
 extern int fread(void* buffer, size_t size, size_t count, FILE* stream);
 extern int fclose(FILE* stream);
-extern void* kmalloc(size_t size);
 
 #endif

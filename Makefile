@@ -60,6 +60,7 @@ _kernel:
 	@$(CC) $(CFLAGS) libc/include/stdio/ftell.c		-o lib/ftell.o
 	@$(CC) $(CFLAGS) libc/include/stdio/fseek.c		-o lib/fseek.o
 	@$(CC) $(CFLAGS) libc/include/stdio/fclose.c	-o lib/fclose.o
+	@$(CC) $(CFLAGS) libc/include/stdio/fgets.c	-o lib/fgets.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/itoa.c		-o lib/itoa.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kmalloc.c	-o lib/kmalloc.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/kcalloc.c	-o lib/kcalloc.o
@@ -67,7 +68,7 @@ _kernel:
 	@$(CC) $(CFLAGS) libc/include/stdlib/krealloc.c	-o lib/krealloc.o
 	@$(CC) $(CFLAGS) libc/include/math/ceil.c		-o lib/ceil.o
 
-	ld $(LDFLAGS) boot.o kernel.o $(KERNEL_OBJECTS) $(OBJECTS) -o kernel.bin
+	@ld $(LDFLAGS) boot.o kernel.o $(KERNEL_OBJECTS) $(OBJECTS) -o kernel.bin
 
 os.iso: kernel.bin
 	@cp kernel.bin iso/boot/kernel.bin

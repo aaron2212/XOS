@@ -62,5 +62,6 @@ long ftell(FILE* stream);
 int fseek(FILE* stream, long int offset, int origin);
 void rewind(FILE* stream);
 int fclose(FILE* stream);
+char* fgets(char* str, int num, FILE* stream);
 
 #endif
