@@ -63,6 +63,8 @@ void k_main(void* mb_struct) {
     else
         kprintf("Could not load filesystem: %s\n", get_last_error());
 
+    FILE* fp = vfs_create("/myfile");
+
     while (1) {
         shell();
     }

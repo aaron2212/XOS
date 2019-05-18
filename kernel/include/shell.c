@@ -17,6 +17,7 @@ fn_table_entry_t fn_table[] = {
     {"ls", xsh_ls},
     {"pwd", xsh_pwd},
     {"rm", xsh_rm},
+    {"rmdir", xsh_rmdir},
 };
 
 char* builtin_commands[] = {
@@ -30,6 +31,7 @@ char* builtin_commands[] = {
     "ls",
     "pwd",
     "rm",
+    "rmdir",
 };
 
 void (*fn_lookup(char* fname))() {
@@ -45,7 +47,6 @@ void (*fn_lookup(char* fname))() {
 void shell() {
     // TODO: change kprintf('dir$ ') to the format `user@pc-name:dir$ `
     // future TODO: check if user is root and so change "$" to "#"
-
     char* line;
     char** args;
 
@@ -162,7 +163,8 @@ void xsh_help() {
         "cd:    change the current working directory\n"
         "ls:    list the contents of a directory\n"
         "pwd:   display the current working directory\n"
-        "rm:    remove a file\n");
+        "rm:    remove a file\n"
+        "rmdir: remove a directory and its contents\n");
 }
 
 // Prints the output after the "echo" command
@@ -172,11 +174,13 @@ void xsh_echo(char** args) {
             kprintf("%s ", args[i]);
         }
     }
+
+    kprintf("\n");
 }
 
 // Exits the shell (and possibly the OS too. User should use "shutdown" command if they wish to shutdown the computer)
 void xsh_exit() {
-    kprintf("Exit requested!");
+    kprintf("Exit requested!\n");
 }
 
 // Clears the screen
@@ -189,12 +193,16 @@ void xsh_cat(char** args) {
     // The name of the file to read
     char* filename = args[1];
 
+    if (strlen(filename) == 0 || filename == NULL) {
+        kprintf("cat: no file specified\n");
+        return;
+    }
+
     // Attempt to open a file stream with the given filename
     FILE* fp = fopen(filename, "r");
 
     if (fp == NULL) {
-        kprintf("cat: %s: no such file", filename);
-
+        kprintf("cat: %s: no such file\n", filename);
         return;
     }
 
@@ -212,8 +220,15 @@ void xsh_cat(char** args) {
 
 // TODO: check for invalid filename
 // Create a new file
-void xsh_touch(/*char** args*/) {
-    kprintf("TODO: implement");
+void xsh_touch(char** args) {
+    char* filename = args[0];
+
+    if (filename == NULL || strncmp(filename, "", 1) == 0) {
+        kprintf("touch: missing file operand\n");
+        return;
+    }
+
+    vfs_create(filename);
 }
 
 // Change the current working directory
@@ -227,46 +242,52 @@ void xsh_cd(char** args) {
         int result = vfs_changedir(dirname);
 
         if (result == -1)
-            kprintf("cd: %s: no such directory", dirname);
+            kprintf("cd: %s: no such directory\n", dirname);
     }
 }
 
 // List the contents of the current directory
-// TODO: check for no args[1] specified
 void xsh_ls(char** args) {
     char* dirname = args[1];
 
-    DIR* dir = opendir(dirname);
-
-    if (dir == NULL) {
-        kprintf("ls: cannot access '%s': no such directory", dirname);
-        return;
+    if (strncmp(dirname, "", 1) == 0) {
+        strcpy(dirname, current_dir);
     }
 
-    struct dirent* dirent;
-
-    // Print out each entry name in the directory
-    while ((dirent = readdir(dir))) {
-        kprintf("%s ", dirent->name);
+    if (!readdir_alternative(dirname)) {
+        kprintf("ls: cannot access '%s': no such file or directory\n", dirname);
     }
-
-    // kprintf("\n\n\n");
-
-    closedir(dir);
 }
 
 // Display the current working directory
 void xsh_pwd() {
-    kprintf("%s", current_dir);
+    kprintf("%s\n", current_dir);
 }
 
 // Remove a file from the filesystem
 void xsh_rm(char** args) {
     char* filename = args[1];
 
+    if (strlen(filename) == 0 || filename == NULL) {
+        kprintf("rm: missing operand\n");
+        return;
+    }
+
     if (!vfs_rm(filename)) {
-        kprintf("rm: %s: file does not exist\n", filename);
-    } else {
-        kprintf("File removal in process...");
+        kprintf("rm: cannot remove '%s': No such file\n", filename);
+    }
+}
+
+// Remove a directory and its contents from the filesystem
+void xsh_rmdir(char** args) {
+    char* dirname = args[1];
+
+    if (strlen(dirname) == 0 || dirname == NULL) {
+        kprintf("rmdir: missing operand\n");
+        return;
+    }
+
+    if (!vfs_rmdir(dirname)) {
+        kprintf("rmdir: failed to remove '%s': no such directory\n", dirname);
     }
 }

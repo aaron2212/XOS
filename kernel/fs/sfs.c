@@ -162,8 +162,6 @@ FILE* create(char* filename) {
     char** entry_names = kmalloc(total_rootfs_files);
     get_entry_names(entry_names, entries, FILE_ENTRY);
 
-    // bool entry_found = false;
-
     for (unsigned int i = 0; i < (total_rootfs_dirs + total_rootfs_files); i++) {
         if (strcmp(entry_names[i], filename) == 0)
             return NULL;
@@ -408,6 +406,87 @@ struct dirent* readdir(DIR* dir) {
     // return dir->current_dir < dir->total_entries ? dir->entries[dir->current_dir++] : NULL;
 }
 
+// Alternative function to read the contents of a directory. Prints out all
+// entries without storing them in a DIR struct
+bool readdir_alternative(char* dirname) {
+    make_full_path(dirname);
+
+    if (strlen(dirname) == 0) {
+        strcpy(dirname, PATH_SEPARATOR);
+    }
+
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_dirs + total_rootfs_files);
+    get_entry_names(entry_names, entries, DIRECTORY_ENTRY | FILE_ENTRY);
+    bool _dir_found = false;
+
+    // Replace '.' with the current directory
+    if (strlen(dirname) > 0 && dirname[0] == '.')
+        strcpy(dirname, current_dir);
+
+    // If `dirname` was the root directory (ie. a '/'), then list all files in the filesystem (depth=1)
+    if (strcmp(dirname, PATH_SEPARATOR) == 0) {
+        // Get a list of the directory's entries
+        for (unsigned int i = 0; i < total_rootfs_dirs + total_rootfs_files; i++) {
+            // Strip the first character from the path name (always a '/')
+            char* entry_name = kcalloc(strlen(entry_names[i]), 1);
+            strcpy(entry_name, entry_names[i] + 1);
+
+            // Only add to the array those entries which are in the root directory
+            if (strchr(entry_name, '/') == NULL) {
+                kprintf("%s\n", entry_name);
+                _dir_found = true;
+            }
+        }
+
+        return _dir_found;
+    } else {
+        // Remove any trailing forward slash
+        if (dirname[strlen(dirname) - 1] == PATH_SEPARATOR_CHAR && strcmp(dirname, PATH_SEPARATOR) != 0)
+            dirname[strlen(dirname) - 1] = '\0';
+
+        bool dir_found = false;
+
+        // Try and find a directory in the filesystem matching `dirname`
+        for (unsigned int i = 0; i < total_rootfs_dirs; i++) {
+            if (strcmp(entry_names[i], dirname) == 0) {
+                dir_found = true;
+            }
+        }
+
+        // If a directory was found, set the DIR file descriptor and return it, or NULL otherwise
+        if (dir_found) {
+            // Holds the subdirectories within the opened directory
+            unsigned int i = 0;
+
+            // Get a list of the directory's subdirectories
+            for (i = 0; i < total_rootfs_dirs + total_rootfs_files; i++) {
+                // Do not store `dir->dirname` in the list
+                if (strcmp(dirname, entry_names[i]) != 0) {
+                    if (strncmp(dirname, entry_names[i], strlen(dirname)) == 0) {
+                        // Strip away `dirname` from each directory name
+                        char* s = kmalloc(strlen(entry_names[i]) - strlen(dirname));
+                        memcpy(s, entry_names[i] + strlen(dirname) + 1, strlen(entry_names[i]) - strlen(dirname));
+
+                        // Do not include directory names that include a '/'
+                        if (strchr(s, PATH_SEPARATOR_CHAR) == NULL) {
+                            kprintf("%s  ", s);
+                        }
+
+                        kfree(s);
+                    }
+                }
+            }
+
+            kfree(entry_names);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // Change the current working directory
 int changedir(char* dirname) {
     // Get a list of all the files and their filenames in the filesystem
@@ -443,25 +522,56 @@ int closedir(DIR* dir) {
 // Attempt to remove (delete) a single file from the filesystem.
 // This is done by setting the entry to a deleted file entry
 bool rm(char* filename) {
-    make_full_path(filename);
+    // make_full_path(filename);
 
     unsigned char* offset = get_offset_by_entry_name(filename);
 
-    if (offset == NULL) {
-        return false;
-    } else {
-        // Determine the number of continuation entries
-        // double num_cont_entries = ceil((strlen(filename) - (float)FILENAME_ENTRY_LEN) / 64);
-
+    if (*offset == FILE_ENTRY) {
         *offset = DELETED_FILE_ENTRY;
-
         return true;
     }
+
+    return false;
 }
 
 // Attempt to remove (delete) a directory from the filesystem
-// TODO: implement
-void rmdir(char* dirname) {
+bool rmdir(char* dirname) {
+    // kprintf("path exists: %d\n", path_exists(dirname));
+    // if (!path_exists(dirname)) {
+    //     return true;
+    // }
+
+    // Get a list of all the files and their filenames in the filesystem
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_files + total_rootfs_dirs);
+
+    if (entry_names == NULL) {
+        return false;
+    }
+
+    get_entry_names(entry_names, entries, DIRECTORY_ENTRY | FILE_ENTRY);
+
+    bool entries_deleted = false;
+
+    // Iterate over each entry in the filesystem, and delete it if it is
+    // a sub entry of the directory being deleted
+    for (unsigned int i = 0; i < total_rootfs_dirs + total_rootfs_files; i++) {
+        if (strncmp(entry_names[i], dirname, strlen(dirname)) == 0) {
+            unsigned char* offset = get_offset_by_entry_name(entry_names[i]);
+
+            if (*offset == DIRECTORY_ENTRY) {
+                *offset = DELETED_DIRECTORY_ENTRY;
+            } else if (*offset == FILE_ENTRY) {
+                *offset = DELETED_FILE_ENTRY;
+            }
+
+            entries_deleted = true;
+        }
+    }
+
+    kfree(entry_names);
+
+    return entries_deleted;
 }
 
 // Given an offset to the start of an entry, find and return the entry's name
@@ -503,8 +613,6 @@ char* get_entry_name_by_offset(char* pos) {
             char cont_name[ENTRY_SIZE + 2];
 
             strncpy(cont_name, pos, ENTRY_SIZE - 1);
-            //cont_name[ENTRY_SIZE] = '\0';
-
             strcat(filename, cont_name);
 
             // Advance to the next entry
@@ -517,14 +625,52 @@ char* get_entry_name_by_offset(char* pos) {
 
 // Return a pointer to the start of the index entry corresponding to `name`
 unsigned char* get_offset_by_entry_name(char* name) {
-    FILE* stream = open(name);
+    // Pointer to the index area so we can search for entries.
+    // Used to keep track of the next index of the struct in the array
+    unsigned char* pos = rootfs_start + (1 * BYTES_PER_BLOCKS) + (rootfs_superblock.data_area_size * BYTES_PER_BLOCKS);
 
-    if (stream == NULL) {
-        return NULL;
-    } else {
-        vfs_close(stream);
-        return stream->offset;
+    while (pos < rootfs_end) {
+        if (*pos == DIRECTORY_ENTRY || *pos == FILE_ENTRY || *pos == DELETED_FILE_ENTRY) {
+            char* full_name = get_full_name(pos);
+            if (strcmp(full_name, name) == 0) {
+                kfree(full_name);
+                return pos;
+            }
+
+            pos += *(pos + 1) * ENTRY_SIZE;
+        }
+
+        pos += ENTRY_SIZE;
     }
+
+    return NULL;
+}
+
+// Get the full name of an entry given its position in the filesystem
+char* get_full_name(unsigned char* pos) {
+    unsigned int num_cont_entries = *(pos + 1);
+    unsigned int name_len = ENTRY_SIZE + (num_cont_entries * ENTRY_SIZE);
+    char* name = kcalloc(name_len, 1);
+
+    // Only directory entries, file entries and deleted file entries have names
+    if (*pos == DIRECTORY_ENTRY) {
+        memcpy(name, (char*)pos + DIRECTORY_NAME_OFFSET, DIRECTORY_NAME_ENTRY_LEN);
+    } else if (*pos == FILE_ENTRY || *pos == DELETED_FILE_ENTRY) {
+        memcpy(name, (char*)pos + FILENAME_OFFSET, FILENAME_ENTRY_LEN);
+    } else {
+        return NULL;
+    }
+
+    pos += ENTRY_SIZE;
+
+    for (unsigned int i = 0; i < num_cont_entries; i++) {
+        strncat(name, (char*)pos, ENTRY_SIZE);
+        pos += ENTRY_SIZE;
+    }
+
+    name[strlen(name)] = '\0';
+
+    return name;
 }
 
 // Populate an array of entry structs with a list of entries found in the filesystem
@@ -659,12 +805,12 @@ void find_all_entries(struct entry entries[]) {
 // Get a list of names of all the entries in the filesystem
 // TODO: check `_entry_type` to determine the size of the `entry_names` array
 void get_entry_names(char** entry_names, struct entry entries[], int _entry_type) {
-    int i = 0; // Keep track of the name of the current entry to add to the array
+    unsigned int i = 0; // Keep track of the name of the current entry to add to the array
 
     // Get a list of all the filesystem entries
     find_all_entries(entries);
 
-    char* name = ""; // The name of the entry
+    char* name; // The name of the entry
     struct entry cur_entry;
     uint8_t entry_type;
 
@@ -689,15 +835,6 @@ void get_entry_names(char** entry_names, struct entry entries[], int _entry_type
             num_cont_entries = cur_entry.entry.file_ent.num_cont_entries;
             entry_name_len = FILENAME_ENTRY_LEN;
         }
-        // Deleted directory entry
-        else if ((_entry_type & entry_type) == DELETED_DIRECTORY_ENTRY) {
-            num_cont_entries = cur_entry.entry.del_dir_ent.num_cont_entries;
-        }
-        // Deleted file entry
-        else if ((_entry_type & entry_type) == DELETED_FILE_ENTRY) {
-            num_cont_entries = cur_entry.entry.del_file_ent.num_cont_entries;
-            entry_name_len = FILENAME_ENTRY_LEN;
-        }
 
         int name_len = entry_name_len + (num_cont_entries * ENTRY_SIZE);
         // Store the name of the entry (files and folders only)
@@ -715,13 +852,9 @@ void get_entry_names(char** entry_names, struct entry entries[], int _entry_type
         if ((_entry_type & entry_type) == DIRECTORY_ENTRY) {
             strncpy(name, (const char*)cur_entry.entry.dir_ent.name,
                     sizeof(cur_entry.entry.dir_ent.name));
-        }
-        if ((_entry_type & entry_type) == FILE_ENTRY) {
+        } else if ((_entry_type & entry_type) == FILE_ENTRY) {
             strncpy(name, (const char*)cur_entry.entry.file_ent.filename,
                     sizeof(cur_entry.entry.file_ent.filename));
-        } else if ((_entry_type & entry_type) == DELETED_FILE_ENTRY) {
-            strncpy(name, (const char*)cur_entry.entry.del_file_ent.filename,
-                    sizeof(cur_entry.entry.del_file_ent.filename));
         }
 
         /*
@@ -745,7 +878,7 @@ void get_entry_names(char** entry_names, struct entry entries[], int _entry_type
         name[name_len] = '\0'; // Add the null byte to the end of the string
 
         // Add the name of the entry to the array
-        if (((_entry_type & DIRECTORY_ENTRY) == DIRECTORY_ENTRY && entry_type == DIRECTORY_ENTRY) || ((_entry_type & FILE_ENTRY) == FILE_ENTRY && entry_type == FILE_ENTRY) || ((_entry_type & DELETED_FILE_ENTRY) == DELETED_FILE_ENTRY && entry_type == DELETED_FILE_ENTRY)) {
+        if (((_entry_type & DIRECTORY_ENTRY) == DIRECTORY_ENTRY && entry_type == DIRECTORY_ENTRY) || ((_entry_type & FILE_ENTRY) == FILE_ENTRY && entry_type == FILE_ENTRY)) {
             // kprintf("%s ", name);
             //memcpy(entry_names[i++], name, strlen(name));
             entry_names[i++] = name;
@@ -806,4 +939,45 @@ bool is_filename_valid(char* filename) {
     }
 
     return true;
+}
+
+// Determine if a file or directory exists in the filesystem
+// ERROR: NOT WORKING
+bool path_exists(char* path) {
+    // Get a list of all the file and directories names in the filesystem
+    struct entry entries[total_rootfs_entries];
+    char** entry_names = kmalloc(total_rootfs_files + total_rootfs_dirs);
+
+    if (entry_names == NULL) {
+        return false;
+    }
+
+    get_entry_names(entry_names, entries, DIRECTORY_ENTRY | FILE_ENTRY);
+
+    for (unsigned int i = 0; i < total_rootfs_dirs + total_rootfs_files; i++) {
+        if (strcmp(entry_names[i], path) == 0) {
+            // kfree(entry_names);
+            // kprintf("%s!", entry_names[i]);
+            return true;
+        }
+    }
+
+    kfree(entry_names);
+    return false;
+}
+
+// Determine if an entry is a directory by checking it's type
+bool is_dir(char* path) {
+    make_full_path(path);
+    unsigned char* offset = get_offset_by_entry_name(path);
+
+    return *offset == DIRECTORY_ENTRY;
+}
+
+// Determine if an entry is a file by checking it's type
+bool is_file(char* path) {
+    make_full_path(path);
+    unsigned char* offset = get_offset_by_entry_name(path);
+
+    return *offset == FILE_ENTRY;
 }

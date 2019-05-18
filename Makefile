@@ -65,7 +65,7 @@ _kernel:
 	@$(CC) $(CFLAGS) libc/include/stdlib/krealloc.c	-o lib/krealloc.o
 	@$(CC) $(CFLAGS) libc/include/math/ceil.c		-o lib/ceil.o
 
-	@ld $(LDFLAGS) boot.o kernel.o $(KERNEL_OBJECTS) $(OBJECTS) -o kernel.bin
+	ld $(LDFLAGS) boot.o kernel.o $(KERNEL_OBJECTS) $(OBJECTS) -o kernel.bin
 
 os.iso: kernel.bin
 	@cp kernel.bin iso/boot/kernel.bin

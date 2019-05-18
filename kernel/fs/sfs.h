@@ -47,7 +47,7 @@ DIR* opendir(char* dirname);
 int changedir(char* dirname);
 int closedir(DIR* dir);
 bool rm(char* filename);
-void rmdir(char* dirname);
+bool rmdir(char* dirname);
 
 char* get_entry_name_by_offset(char* pos);
 unsigned char* get_offset_by_entry_name(char* name);
@@ -180,5 +180,10 @@ void find_all_entries(struct entry entries[]);
 void get_entry_names(char** entry_names, struct entry entries[], int _entry_type);
 void count_files_and_dirs();
 bool is_filename_valid();
+char* get_full_name(unsigned char* pos);
+bool readdir_alternative(char* dirname);
+bool path_exists(char* path);
+bool is_dir(char* path);
+bool is_file(char* path);
 
 #endif

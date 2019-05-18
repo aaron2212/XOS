@@ -24,6 +24,7 @@ int index;
 unsigned int num_args; // The number of arguments passed to the command
 
 extern void terminal_clear_screen();
+extern bool readdir_alternative(char* dirname);
 
 void shell();
 int command_count();
