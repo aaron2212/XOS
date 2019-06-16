@@ -26,9 +26,10 @@ _kernel:
 	@$(CC) $(CFLAGS) kernel/fs/vfs.c				-o objs/vfs.o
 	@$(CC) $(CFLAGS) kernel/fs/sfs.c				-o objs/sfs.o
 	@$(CC) $(CFLAGS) kernel/fs/fs.c					-o objs/fs.o
-	@$(CC) $(CFLAGS) kernel/errors/errors.c			-o objs/errors.o
 	@$(CC) $(CFLAGS) kernel/system/system.c			-o objs/system.o
-	@$(CC  $(CFLAGS) kernel/system/users.c			-o objs/users.o
+	@$(CC) $(CFLAGS) kernel/system/users.c			-o objs/users.o
+	@$(CC) $(CFLAGS) kernel/system/time.c			-o objs/systime.o
+	@$(CC) $(CFLAGS) kernel/system/helpers.c			-o objs/helpers.o
 	@$(CC) $(CFLAGS) include/gdt/gdt.c				-o objs/gdt.o
 	@$(CC) $(CFLAGS) include/idt/idt.c				-o objs/idt.o
 	@$(CC) $(CFLAGS) include/isr_irq/isrs.c			-o objs/isrs.o
@@ -68,6 +69,7 @@ _kernel:
 	@$(CC) $(CFLAGS) libc/include/stdlib/kfree.c	-o lib/kfree.o
 	@$(CC) $(CFLAGS) libc/include/stdlib/krealloc.c	-o lib/krealloc.o
 	@$(CC) $(CFLAGS) libc/include/math/ceil.c		-o lib/ceil.o
+	@$(CC) $(CFLAGS) libc/include/math/floor.c		-o lib/floor.o
 
 	@ld $(LDFLAGS) boot.o kernel.o $(KERNEL_OBJECTS) $(OBJECTS) -o kernel.bin
 
