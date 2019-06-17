@@ -31,8 +31,9 @@ int get_system_time()
 
     // Get number of seconds since the UNIX epoch and the end of the last year
     // -108000 (30 hours) seconds for weird time difference
-    unsigned int total_seconds_before_current_year = years_from_epoch * YEAR_SECONDS - 108000;
+    unsigned int total_seconds_before_current_year = (years_from_epoch * YEAR_SECONDS) + (num_leap_years * (60*60*24));// - 108000;
     unsigned int current_year_seconds;
+
 
     // Determine the number of seconds that have gone by in the current year
     switch (month-1) {
@@ -88,7 +89,28 @@ int get_system_time()
 
     // The total number of seconds from the UNIX epoch
     unsigned int total_seconds = total_seconds_before_current_year + current_year_seconds;
-    total_seconds += (day*24*60*60) + (hour*60*60) + (minute*60) + second;
+    total_seconds += ((day-1)*24*60*60) + (hour*60*60) + (minute*60) + second;
 
     return total_seconds;
+}
+
+// Install the PIT timer as IRQ0
+void init_timer()
+{
+    irq_install_handler(0, handle_timer);
+}
+
+void handle_timer()
+{
+    timer_ticks++;
+
+    if (timer_ticks % 18 == 0) {
+        // do stuff here when 1 second has past
+    }
+}
+
+// Return the uptime of the system in seconds
+int get_uptime()
+{
+    return timer_ticks / 18;
 }

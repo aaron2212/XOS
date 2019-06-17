@@ -48,8 +48,8 @@ void k_main(void* mb_struct) {
     init_idt();
     init_isrs();
     init_irqs();
-    //init_timer(); /* not working */
-    init_keyboard();
+    kprintf("\nInitializing the timer... ");
+    init_timer(); /* not working */
     kprintf("OK\n\n");
 
     // Status information
@@ -67,6 +67,8 @@ void k_main(void* mb_struct) {
     // Initialize system configurations
     init_system();
 
+    kprintf("\n");
+    
     while (1) {
         shell();
     }

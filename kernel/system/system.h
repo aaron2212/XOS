@@ -52,7 +52,7 @@ enum time_seconds {
     OCTOBER_SECONDS = 2678400,
     NOVEMBER_SECONDS = 2592000,
     DECEMBER_SECONDS = 2678400,
-    YEAR_SECONDS = 31557600,
+    YEAR_SECONDS = /*31557600*/31536000,
     LEAP_YEAR_SECONDS = 31622400
 };
 
@@ -60,6 +60,8 @@ char* hostname;
 struct user users[MAX_USERS];
 unsigned int total_user_count;
 struct user current_user;
+
+int timer_ticks;
 
 void init_system();
 void init_users();
@@ -69,11 +71,15 @@ bool set_current_user(struct user current_user);
 
 int get_system_time();
 char read_rtc_register(uint16_t type);
+int get_uptime();
+void init_timer();
+void handle_timer();
 
 int bcd2bin(int bcd);
 
 extern FILE* fopen(char* filename, const char* mode);
 extern int fread(void* buffer, size_t size, size_t count, FILE* stream);
 extern int fclose(FILE* stream);
+extern void irq_install_handler(int irq, void (*handler));
 
 #endif

@@ -429,7 +429,10 @@ irq_handler:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	mov eax, esp
+	push eax
 	call irq_fault_handler
+	pop eax
 	pop gs
 	pop fs
 	pop es

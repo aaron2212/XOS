@@ -97,7 +97,7 @@ void isr_fault_handler(struct regs r)
 	if (r.int_no < 32)
 	{
 		/* display description of exception that has occured */
-		kprintf("Caught exception %d [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
+		kprintf("Caught exception 0x%x [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
 		//dump_registers(13, "a", "eax", "ebx", "ecx", "edx", "esi", "edi", "eip", "ebp", "ds", "es", "fs", "gs");
 	}
 }
