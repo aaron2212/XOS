@@ -44,5 +44,6 @@ void xsh_rm(char** args);
 void xsh_rmdir(char** args);
 void xsh_hostname();
 void xsh_login();
+void xsh_uptime();
 
 #endif
