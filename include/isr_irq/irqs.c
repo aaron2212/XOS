@@ -27,16 +27,18 @@ void irq_uninstall_handler(int irq)
 
 void irq_remap(void)
 {
-    outb(0x20, 0x11); // 17
-    outb(0xA0, 0x11); // 17
-    outb(0x21, 0x20); // 32
-    outb(0xA1, 0x28); // 40
-    outb(0x21, 0x04); // 4
-    outb(0xA1, 0x02); // 2
-    outb(0x21, 0x01); // 1
-    outb(0xA1, 0x01); // 1
-    outb(0x21, 0x0);  // 0
-    outb(0xA1, 0x0);  // 0
+    asm("cli");
+    outb(0x20, 0x11); // init
+    outb(0xA0, 0x11); // init
+    outb(0x21, 0x20); // 
+    outb(0xA1, 0x28); // 
+    outb(0x21, 0x04); // 
+    outb(0xA1, 0x02); // 
+    outb(0x21, 0x01); // 
+    outb(0xA1, 0x01); // 
+    outb(0x21, 0x0);  // 
+    outb(0xA1, 0x0);  // 
+    asm("sti");
 }
 
 void init_irqs(void)
@@ -60,6 +62,8 @@ void init_irqs(void)
 	idt_set_gate(45, (unsigned) irq13, 0x08, 0x8E);
 	idt_set_gate(46, (unsigned) irq14, 0x08, 0x8E);
 	idt_set_gate(47, (unsigned) irq15, 0x08, 0x8E);
+
+    irq_install_handler(0, handle_timer);
 }
 
 /*
@@ -82,11 +86,12 @@ void irq_fault_handler(struct regs *r)
     	handler(r);
     }
 
-    /* If the IDT entry that was invoked was greater than 40
+    /* If the IDT entry that was invoked was >= 40
     *  (meaning IRQ8 - 15), then we need to send an EOI to
     *  the slave controller */
     if (r->int_no >= 40)
     {
+        // kprintf("0x%x ", r->int_no);
         outb(0xA0, 0x20);
     }
 
