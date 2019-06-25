@@ -37,15 +37,16 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-struct regs {
-	uint32_t gs, fs, es, ds;							// push segments last
-	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;	// pushed by 'pusha'
-	uint32_t err_code, int_no;							// 'push byte #' and error code
-	uint32_t eip, cs, eflags;							// pushed by CPU automatically
+struct regs
+{
+	uint32_t gs, fs, es, ds;						 // push segments last
+	uint32_t edi, ebp, esi, esp, eax, ebx, edx, ecx; // pushed by 'pusha'
+	uint32_t err_code, int_no;						 // 'push byte #' and error code
+	uint32_t eip, cs, eflags, useresp, ss;			 // pushed by CPU automatically
 };
 
 void init_isrs();
 void isr_fault_handler(struct regs r);
-void dump_registers(uint32_t num, const char *regs, ...);
+void dump_registers(struct regs r);
 
 #endif

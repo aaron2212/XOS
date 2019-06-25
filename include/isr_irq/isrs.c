@@ -79,17 +79,25 @@ char *exception_message[] =
 	"Reserved",
 };
 
-void dump_registers(uint32_t num, const char *regs, ...)
+void dump_registers(struct regs r)
 {
-	va_list args;
-	va_start(args, regs);
-
-	for (unsigned int i=0; i<num-1; i++) {
-		int reg = va_arg(args, int);
-		kprintf("%s=0x%d\n", reg, reg);
-	}
-
-	va_end(args);
+	kprintf("eax=0x%x\n", r.eax);
+	kprintf("ebx=0x%x\n", r.ebx);
+	kprintf("ecx=0x%x\n", r.ecx);
+	kprintf("edx=0x%x\n", r.edx);
+	kprintf("ebp=0x%x\n", r.ebp);
+	kprintf("esp=0x%x\n", r.esp);
+	kprintf("edi=0x%x\n", r.edi);
+	kprintf("esi=0x%x\n", r.esi);
+	kprintf("eip=0x%x\n", r.eip);
+	kprintf("eflags=0x%x\n", r.eflags);
+	kprintf("useresp=0x%x\n", r.useresp);
+	kprintf("ss=0x%x\n", r.ss);
+	kprintf("cs=0x%x\n", r.cs);
+	kprintf("ds=0x%x\n", r.ds);
+	kprintf("fs=0x%x\n", r.fs);
+	kprintf("es=0x%x\n", r.es);
+	kprintf("gs=0x%x\n", r.gs);
 }
 
 void isr_fault_handler(struct regs r)
@@ -98,6 +106,23 @@ void isr_fault_handler(struct regs r)
 	{
 		/* display description of exception that has occured */
 		kprintf("Caught exception 0x%x [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
-		//dump_registers(13, "a", "eax", "ebx", "ecx", "edx", "esi", "edi", "eip", "ebp", "ds", "es", "fs", "gs");
+		// kprintf("eax=0x%x\n", r.eax);
+		// kprintf("ebx=0x%x\n", r.ebx);
+		// kprintf("ecx=0x%x\n", r.ecx);
+		// kprintf("edx=0x%x\n", r.edx);
+		// kprintf("ebp=0x%x\n", r.ebp);
+		// kprintf("esp=0x%x\n", r.esp);
+		// kprintf("edi=0x%x\n", r.edi);
+		// kprintf("esi=0x%x\n", r.esi);
+		// kprintf("eip=0x%x\n", r.eip);
+		// kprintf("eflags=0x%x\n", r.eflags);
+		// kprintf("useresp=0x%x\n", r.useresp);
+		// kprintf("ss=0x%x\n", r.ss);
+		// kprintf("cs=0x%x\n", r.cs);
+		// kprintf("ds=0x%x\n", r.ds);
+		// kprintf("fs=0x%x\n", r.fs);
+		// kprintf("es=0x%x\n", r.es);
+		// kprintf("gs=0x%x\n", r.gs);
+		asm("hlt");
 	}
 }
