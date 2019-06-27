@@ -68,12 +68,8 @@ void k_main(void* mb_struct) {
     init_system();
 
     kprintf("Entering user mode...");
-    // enter_usermode();
+    enter_usermode();
     kprintf("OK\n");
-
-    // kprintf("\n");
-
-    // asm("mov $0x23, %eax");
     
     while (1) {
         shell();

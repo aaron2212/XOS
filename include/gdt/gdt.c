@@ -57,11 +57,11 @@ void init_gdt()
 	gdt_set_descriptor(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User code descriptor
 	gdt_set_descriptor(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data descriptor
 
-	// Install the TSS to selector 5
-	install_tss(5, 0x10, 0x0);
-
 	/* install the GDT */
 	install_gdt();
+
+	// Install the TSS to selector 5
+	install_tss(5, 0x10, 0x0);
 }
 
 void install_tss(uint32_t i, uint16_t kernel_ss, uint16_t kernel_esp)
@@ -83,8 +83,7 @@ void install_tss(uint32_t i, uint16_t kernel_ss, uint16_t kernel_esp)
 	tss_entry.gs = 0x13;
 
 	asm(
-		"mov $0x2b, %ax\n"
-		"ltr %ax"
+		"ltr %0" :: "r"((uint16_t) 0x2B)
 	);
 }
 

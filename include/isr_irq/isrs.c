@@ -106,23 +106,6 @@ void isr_fault_handler(struct regs r)
 	{
 		/* display description of exception that has occured */
 		kprintf("Caught exception 0x%x [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
-		// kprintf("eax=0x%x\n", r.eax);
-		// kprintf("ebx=0x%x\n", r.ebx);
-		// kprintf("ecx=0x%x\n", r.ecx);
-		// kprintf("edx=0x%x\n", r.edx);
-		// kprintf("ebp=0x%x\n", r.ebp);
-		// kprintf("esp=0x%x\n", r.esp);
-		// kprintf("edi=0x%x\n", r.edi);
-		// kprintf("esi=0x%x\n", r.esi);
-		// kprintf("eip=0x%x\n", r.eip);
-		// kprintf("eflags=0x%x\n", r.eflags);
-		// kprintf("useresp=0x%x\n", r.useresp);
-		// kprintf("ss=0x%x\n", r.ss);
-		// kprintf("cs=0x%x\n", r.cs);
-		// kprintf("ds=0x%x\n", r.ds);
-		// kprintf("fs=0x%x\n", r.fs);
-		// kprintf("es=0x%x\n", r.es);
-		// kprintf("gs=0x%x\n", r.gs);
-		asm("hlt");
+		dump_registers(r);
 	}
 }
