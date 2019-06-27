@@ -41,17 +41,15 @@ void set_interrupt_number(int num)
 
 void idt_set_gate(uint32_t i, uint64_t base, uint16_t selector, uint8_t flags)
 {
-	/*if (i > MAX_INTERRUPTS)
-		return;*/
+	if (i > MAX_INTERRUPTS)
+		return;
 
 	/* The interrupt routine's base address */
-
     idt_desc[i].base_low 	= (base & 0xFFFF);
     idt_desc[i].base_high 	= (base >> 16) & 0xFFFF;
 
     /* The segment or 'selector' that this IDT entry will use
-    *  is set here, along with any access flags */
-
+     * is set here, along with any access flags */
     idt_desc[i].selector 	= selector;
     idt_desc[i].reserved 	= 0;
     idt_desc[i].flags 		= flags;
@@ -65,10 +63,8 @@ void init_idt(void)
 	idt_p.base  = (uint32_t) &idt_desc;
 
 	/* null the entire IDT */
-
 	memset(&idt_desc, 0, sizeof(idt_desc) * MAX_INTERRUPTS);
 
 	/* install the new IDT */
-
 	_init_idt();
 }

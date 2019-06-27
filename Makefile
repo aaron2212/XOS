@@ -29,7 +29,8 @@ _kernel:
 	@$(CC) $(CFLAGS) kernel/system/system.c			-o objs/system.o
 	@$(CC) $(CFLAGS) kernel/system/users.c			-o objs/users.o
 	@$(CC) $(CFLAGS) kernel/system/time.c			-o objs/systime.o
-	@$(CC) $(CFLAGS) kernel/system/helpers.c			-o objs/helpers.o
+	@$(CC) $(CFLAGS) kernel/system/helpers.c		-o objs/helpers.o
+	@$(CC) $(CFLAGS) kernel/system/usermode.c		-o objs/usermode.o
 	@$(CC) $(CFLAGS) include/gdt/gdt.c				-o objs/gdt.o
 	@$(CC) $(CFLAGS) include/idt/idt.c				-o objs/idt.o
 	@$(CC) $(CFLAGS) include/isr_irq/isrs.c			-o objs/isrs.o
