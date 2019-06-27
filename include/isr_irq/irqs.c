@@ -24,7 +24,6 @@ void irq_uninstall_handler(int irq)
  * remapping IRQ0-15 to IDT
  * entries 32-47
 */
-
 void irq_remap(void)
 {
     asm("cli");
@@ -71,7 +70,6 @@ void init_irqs(void)
  * to tell the IRQ controllers we are done
  * EOI needs to be sent to both controllers
 */
-
 void irq_fault_handler(struct regs *r)
 {
     /* This is a blank function pointer */
