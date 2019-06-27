@@ -77,6 +77,9 @@ void handle_timer();
 
 int bcd2bin(int bcd);
 
+// User mode
+void enter_usermode();
+
 extern FILE* fopen(char* filename, const char* mode);
 extern int fread(void* buffer, size_t size, size_t count, FILE* stream);
 extern int fclose(FILE* stream);
