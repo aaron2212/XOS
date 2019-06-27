@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("_di",["Struct"],[["_DIR",,[[,"_DIR typedef\'d as DIR",,,0,"File:vfs.h:_DIR_typedef\'d_as_DIR","CClass:_DIR_typedef\'d_as_DIR"]]]]);

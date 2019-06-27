@@ -21,6 +21,7 @@ fn_table_entry_t fn_table[] = {
     {"rmdir", xsh_rmdir},
     {"hostname", xsh_hostname},
     {"login", xsh_login},
+    {"uptime", xsh_uptime},
 };
 
 char* builtin_commands[] = {
@@ -37,6 +38,7 @@ char* builtin_commands[] = {
     "rmdir",
     "hostname",
     "login",
+    "uptime"
 };
 
 void (*fn_lookup(char* fname))() {
@@ -163,17 +165,18 @@ char** split_line(char* line) {
 // Prints a help message, display a list of available shell commands
 void xsh_help() {
     kprintf(
-        "echo:  print to the screen\n"
-        "help:  show this help information\n"
-        "exit:  exits the shell (or OS if this is the only shell)\n"
-        "clear: clears the screen\n"
-        "cat:   display the contents of a file\n"
-        "touch: create a new file (not yet implemented)\n"
-        "cd:    change the current working directory\n"
-        "ls:    list the contents of a directory\n"
-        "pwd:   display the current working directory\n"
-        "rm:    remove a file\n"
-        "rmdir: remove a directory and its contents\n");
+        "echo:   print to the screen\n"
+        "help:   show this help information\n"
+        "exit:   exits the shell (or OS if this is the only shell)\n"
+        "clear:  clears the screen\n"
+        "cat:    display the contents of a file\n"
+        "touch:  create a new file (not yet implemented)\n"
+        "cd:     change the current working directory\n"
+        "ls:     list the contents of a directory\n"
+        "pwd:    display the current working directory\n"
+        "rm:     remove a file\n"
+        "rmdir:  remove a directory and its contents\n"
+        "uptime: get the system uptime in seconds\n");
 }
 
 // Prints the output after the "echo" command
@@ -330,4 +333,10 @@ void xsh_login() {
         if (!login_success)
             kprintf("Login incorrect\n");
     }
+}
+
+// Get the system's uptime in seconds
+void xsh_uptime()
+{
+    kprintf("0x%x seconds\n", get_uptime());
 }

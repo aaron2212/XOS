@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("reg",["Struct"],[["regs",,[[,,,,0,"File6:kbd.h:regs","CClass:regs"]]]]);

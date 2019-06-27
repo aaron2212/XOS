@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("File:fs.c",{81:"<div class=\"NDToolTip TFunction LC\"><div class=\"TTSummary\">Initialize the system for filesystem use. Fill the root filesystem structure with information</div></div>"});

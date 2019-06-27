@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File6:shell.h","shell.h");NDSummary.OnSummaryLoaded("File6:shell.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[124,0,1,"Constants","Constants"],[125,0,0,"shell constants","shell_constants"],[126,0,0,,"BUF_SIZE=1024"],[127,0,0,,"TOK_BUF_SIZE=1024"],[128,0,0,,"TOK_DELIM=\"\\t\\r\\n\\a\""]]);

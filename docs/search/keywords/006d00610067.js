@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("mag",["Constant"],[["MAGIC",,[[,"MAGIC = &quot;SFS&quot;",,"magic=\"sfs\"",0,"File:sfs.h:MAGIC=\"SFS\""]]]]);

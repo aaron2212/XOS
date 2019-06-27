@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:_FILE_typedef\'d_as_FILE","_FILE typedef\'d as FILE");NDSummary.OnSummaryLoaded("CClass:_FILE_typedef\'d_as_FILE",[["C/C++","C"]],[["Structs","Struct"]],[[7,0,0,"_FILE typedef\'d as FILE"]]);

@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File6:kbd.c","kbd.c");NDSummary.OnSummaryLoaded("File6:kbd.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[122,0,1,"Functions","Functions"],[123,0,0,"kbd_getchar","kbd_getchar"]]);

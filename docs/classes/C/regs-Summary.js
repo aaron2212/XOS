@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:regs","regs");NDSummary.OnSummaryLoaded("CClass:regs",[["C/C++","C"]],[["Structs","Struct"]],[[163,0,0,"regs"]]);

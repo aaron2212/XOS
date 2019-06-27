@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:deleted_directory_entry","deleted_directory_entry");NDSummary.OnSummaryLoaded("CClass:deleted_directory_entry",[["C/C++","C"]],[["Structs","Struct"]],[[45,0,0,"deleted_directory_entry"]]);

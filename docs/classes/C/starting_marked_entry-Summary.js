@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:starting_marked_entry","starting_marked_entry");NDSummary.OnSummaryLoaded("CClass:starting_marked_entry",[["C/C++","C"]],[["Structs","Struct"]],[[49,0,0,"starting_marked_entry"],[50,0,0,"starting_marked_entry"]]);

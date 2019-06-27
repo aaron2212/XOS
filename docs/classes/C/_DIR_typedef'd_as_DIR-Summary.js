@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:_DIR_typedef\'d_as_DIR","_DIR typedef\'d as DIR");NDSummary.OnSummaryLoaded("CClass:_DIR_typedef\'d_as_DIR",[["C/C++","C"]],[["Structs","Struct"]],[[8,0,0,"_DIR typedef\'d as DIR"]]);

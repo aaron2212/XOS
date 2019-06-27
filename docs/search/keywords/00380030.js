@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("80",["Constant"],[["80",,[[,"VGA_WIDTH = 80",,"vga_width=80",0,"File6:tty.h:VGA_WIDTH=80"]]]]);

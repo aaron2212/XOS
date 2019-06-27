@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File4:kernel.c","kernel.c");NDSummary.OnSummaryLoaded("File4:kernel.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[94,0,1,"Functions","Functions"],[95,0,0,"k_main","k_main"]]);

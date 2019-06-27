@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:deleted_file_entry","deleted_file_entry");NDSummary.OnSummaryLoaded("CClass:deleted_file_entry",[["C/C++","C"]],[["Structs","Struct"]],[[46,0,0,"deleted_file_entry"]]);

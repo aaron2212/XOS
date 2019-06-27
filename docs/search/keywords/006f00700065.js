@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("ope",["Function"],[["open",,[[,,,,0,"File:sfs.c:open"]]]]);

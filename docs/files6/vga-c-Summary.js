@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File6:vga.c","vga.c");NDSummary.OnSummaryLoaded("File6:vga.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[118,0,1,"Functions","Functions"],[119,0,0,"make_color","make_color"],[120,0,0,"terminal_set_color","terminal_set_color"],[121,0,0,"terminal_get_color","terminal_get_color"]]);

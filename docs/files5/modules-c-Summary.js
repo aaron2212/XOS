@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File5:modules.c","modules.c");NDSummary.OnSummaryLoaded("File5:modules.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[100,0,1,"Functions","Functions"],[101,0,0,"load_module","load_module"],[102,0,0,"load_module_by_magic","load_module_by_magic"]]);

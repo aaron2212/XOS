@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:file_entry",{43:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Represents a file in the filesystem</div></div>"});

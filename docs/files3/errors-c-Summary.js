@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File3:errors.c","errors.c");NDSummary.OnSummaryLoaded("File3:errors.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[88,0,1,"Functions","Functions"],[89,0,0,"get_last_error","get_last_error"],[90,0,0,"set_error","set_error"]]);

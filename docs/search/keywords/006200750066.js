@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("buf",["Constant"],[["BUF_SIZE",,[[,"BUF_SIZE&nbsp; = 1024",,"buf_size=1024",0,"File6:shell.h:BUF_SIZE=1024"]]]]);

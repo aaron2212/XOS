@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:_DIR_typedef\'d_as_DIR",{8:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">A high level abstraction of a directory in the filesystem</div></div>"});

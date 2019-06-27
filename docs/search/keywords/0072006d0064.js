@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("rmd",["Function"],[["rmdr",,[[,,,,0,"File:sfs.c:rmdr"]]]]);

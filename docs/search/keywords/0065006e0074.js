@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("ent",["Enumeration","Struct","Constant"],[["entries",,[[,,,,0,"File:sfs.h:entries"]]],["entry",,[[,,,,1,"File:sfs.h:entry","CClass:entry"]]],["ENTRY_SIZE",,[[,"ENTRY_SIZE = 64",,"entry_size=64",2,"File:sfs.h:ENTRY_SIZE=64"]]]]);

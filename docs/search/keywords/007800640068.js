@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("xdh",["Function"],[["xdh_echo",,[["fn_table_entry",,,,0,"File6:shell.c:fn_table_entry.xdh_echo","CClass:fn_table_entry:xdh_echo"]]]]);
