@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:file_entry","file_entry");NDSummary.OnSummaryLoaded("CClass:file_entry",[["C/C++","C"]],[["Structs","Struct"]],[[43,0,0,"file_entry"]]);

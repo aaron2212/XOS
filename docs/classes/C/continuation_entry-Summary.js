@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("CClass:continuation_entry","continuation_entry");NDSummary.OnSummaryLoaded("CClass:continuation_entry",[["C/C++","C"]],[["Structs","Struct"]],[[47,0,0,"continuation_entry"]]);

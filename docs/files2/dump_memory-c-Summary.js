@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File2:dump_memory.c","dump_memory.c");NDSummary.OnSummaryLoaded("File2:dump_memory.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[82,0,1,"Functions","Functions"],[83,0,0,"dump_memory","dump_memory"]]);

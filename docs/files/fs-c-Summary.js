@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File:fs.c","fs.c");NDSummary.OnSummaryLoaded("File:fs.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[80,0,1,"Functions","Functions"],[81,0,0,"init_fs","init_fs"]]);

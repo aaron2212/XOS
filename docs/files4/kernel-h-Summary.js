@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File4:kernel.h","kernel.h");NDSummary.OnSummaryLoaded("File4:kernel.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[91,0,1,"Constants","Constants"],[92,0,0,"general constants used by the kernel","general_constants_used_by_the_kernel"],[93,0,0,,"HEAP_SIZE_ALLOC_PERCENT"]]);

@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("max",["Constant"],[["MAX_MOUNTS",,[[,"MAX_MOUNTS = 64",,"max_mounts=64",0,"File:vfs.h:MAX_MOUNTS=64"]]],["MAX_OPEN_FILES",,[[,"MAX_OPEN_FILES 32768",,,0,"File:fs.h:MAX_OPEN_FILES_32768"]]]]);

@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:_FILE_typedef\'d_as_FILE",{7:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">A high level abstraction of a file in the filesystem</div></div>"});

@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("n",["Constant"],[["n",,[[,"TOK_DELIM&nbsp; = &quot; \\t\\r\\n\\a&quot;",,"tok_delim=\"/t/r/n/a\"",0,"File6:shell.h:TOK_DELIM=\"\\t\\r\\n\\a\""]]]]);

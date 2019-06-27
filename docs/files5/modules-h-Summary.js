@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File5:modules.h","modules.h");NDSummary.OnSummaryLoaded("File5:modules.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[96,0,1,"Constants","Constants"],[97,0,0,"constants for loading GRUB modules","constants_for_loading_GRUB_modules"],[98,0,0,,"FS_MODULE_MAGIC=\"SFS\""],[99,0,0,,"FS_MODULE_MAGIC_OFFSET=0x1AC"]]);

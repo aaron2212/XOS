@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("cha",["Function"],[["changedir",,[[,,,,0,"File:sfs.c:changedir"]]]]);

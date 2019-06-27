@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:superblock",{41:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">The filesystem superblock</div></div>"});

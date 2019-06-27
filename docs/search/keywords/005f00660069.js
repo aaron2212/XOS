@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("_fi",["Struct"],[["_FILE",,[[,"_FILE typedef\'d as FILE",,,0,"File:vfs.h:_FILE_typedef\'d_as_FILE","CClass:_FILE_typedef\'d_as_FILE"]]]]);

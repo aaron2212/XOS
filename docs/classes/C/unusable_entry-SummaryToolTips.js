@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:unusable_entry",{44:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Represents an unusable entry</div></div>"});

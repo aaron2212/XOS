@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("File6:kbd.c",{123:"<div class=\"NDToolTip TFunction LC\"><div id=\"NDPrototype123\" class=\"NDPrototype NoParameterForm\"><span class=\"SHKeyword\">char</span> kbd_getchar()</div><div class=\"TTSummary\">Get the inputted value from the keyboard</div></div>"});

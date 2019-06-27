@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("loa",["Function","Constant"],[["load_module",,[[,,,,0,"File5:modules.c:load_module"]]],["load_module_by_magic",,[[,,,,0,"File5:modules.c:load_module_by_magic"]]],["loading",,[[,"constants for loading GRUB modules",,,1,"File5:modules.h:constants_for_loading_GRUB_modules"]]]]);

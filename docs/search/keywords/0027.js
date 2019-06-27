@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("\'",["Constant"],[["\'",,[[,"ROOT_DIR = \'/\'",,"root_dir=\'/\'",0,"File:fs.h:ROOT_DIR=\'/\'"]]]]);

@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:deleted_directory_entry",{45:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Repesents a directory that was deleted</div></div>"});

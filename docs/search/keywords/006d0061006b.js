@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("mak",["Function"],[["make_color",,[[,,,,0,"File6:vga.c:make_color"]]]]);

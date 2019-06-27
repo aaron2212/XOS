@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("mov",["Function"],[["move_cursor",,[[,,,,0,"File6:tty.c:move_cursor"]]]]);

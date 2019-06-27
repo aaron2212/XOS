@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File6:tty.h","tty.h");NDSummary.OnSummaryLoaded("File6:tty.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[103,0,1,"Constants","Constants"],[104,0,0,"terminal screen constants","terminal_screen_constants"],[105,0,0,,"VGA_WIDTH=80"],[106,0,0,,"VGA_HEIGHT=25"]]);

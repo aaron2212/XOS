@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:deleted_file_entry",{46:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Represents a file that was deleted</div></div>"});

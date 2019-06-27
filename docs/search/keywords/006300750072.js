@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("cur",["Constant"],[["CURRENT_DIR_BUF",,[[,"CURRENT_DIR_BUF = 1024",,"current_dir_buf=1024",0,"File:fs.h:CURRENT_DIR_BUF=1024"]]]]);

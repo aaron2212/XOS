@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("spl",["Function"],[["split_line",,[["fn_table_entry",,,,0,"File6:shell.c:fn_table_entry.split_line","CClass:fn_table_entry:split_line"]]]]);

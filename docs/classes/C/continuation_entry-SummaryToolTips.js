@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:continuation_entry",{47:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Represents a continuation entry. This entry contains directory and file names that are too long to fit into a single entry</div></div>"});

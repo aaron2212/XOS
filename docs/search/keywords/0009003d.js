@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("	=",["Constant"],[["	=","=",[[,"KBD_DOWN_ARROW&nbsp; = 0x50",,"kbd_down_arrow=0x50",0,"File6:kbd.h:KBD_DOWN_ARROW=0x50"],[,"KBD_LEFT_ARROW&nbsp; = 0x4B",,"kbd_left_arrow=0x4b",0,"File6:kbd.h:KBD_LEFT_ARROW=0x4B"],[,"KBD_RIGHT_ARROW&nbsp; = 0x4D",,"kbd_right_arrow=0x4d",0,"File6:kbd.h:KBD_RIGHT_ARROW=0x4D"]]]]);

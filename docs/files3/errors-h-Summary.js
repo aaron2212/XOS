@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File3:errors.h","errors.h");NDSummary.OnSummaryLoaded("File3:errors.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[84,0,1,"Constants","Constants"],[85,0,0,"global error information","global_error_information"],[86,0,0,,"ERROR_MESSAGE_LEN=128"],[87,0,0,,"MEMORY_ALLOC_FAILED=\"Failed_to_allocated_memory\""]]);

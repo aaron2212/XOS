@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("CClass:starting_marked_entry",{49:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Marks the beginning of the index area</div></div>",50:"<div class=\"NDToolTip TStruct LC\"><div class=\"TTSummary\">Marks the end of the volume</div></div>"});
