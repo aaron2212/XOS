@@ -30,7 +30,13 @@ void init_keyboard()
 	// NOT WORKING: irq_install_handler(1, (void*) kbd_getchar);
 }
 
-// TODO: remove hardcoded colors
+/*
+	Func: kbd_getchar
+	Get the inputted value from the keyboard
+
+	Returns:
+		the character the was pressed on the keyboard
+*/
 char kbd_getchar()
 {
 	outb(0x60, 0); // clear output buffer (newline from grub menu selection)

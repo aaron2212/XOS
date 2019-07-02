@@ -1,12 +1,19 @@
 #include "shell.h"
 #include "../system/system.h"
 
+/*
+    Struct: fn_table_entry
+    The command text, along with a function that is executed when the command is typed
+*/
 typedef struct fn_table_entry {
     char* name;
     void (*fn)();
 } fn_table_entry_t;
 
-// A list of shell commands with their corresponding functions to be called when the command is entered
+/*
+    Array: fn_table
+    Stores all the shell commands with their corresponding functions to be called when the command is entered
+*/
 fn_table_entry_t fn_table[] = {
     {"help", xsh_help},
     {"echo", xsh_echo},
@@ -41,6 +48,16 @@ char* builtin_commands[] = {
     "uptime"
 };
 
+/*
+    Func: fn_lookup
+    Searches for a valid command, and calls the function corresponding to it
+    
+    Parameters:
+        fname - the command
+    
+    Returns:
+        A pointer to the function to be called when the command in entered, or NULL if no command was found
+*/
 void (*fn_lookup(char* fname))() {
     for (unsigned int i = 0; i < sizeof(fn_table) / sizeof(fn_table[0]); i++) {
         if (strcmp(fname, fn_table[i].name) == 0) {
@@ -51,9 +68,11 @@ void (*fn_lookup(char* fname))() {
     return NULL;
 }
 
+/*
+    Func: shell
+    The shell that handles use input
+*/
 void shell() {
-    // TODO: change kprintf('dir$ ') to the format `user@pc-name:dir$ `
-    // future TODO: check if user is root and so change "$" to "#"
     char* line;
     char** args;
 
@@ -92,6 +111,13 @@ void shell() {
     kfree(line);
 }
 
+/*
+    Func: read_line
+    Read the inputted line
+
+    Returns:
+        the inputted string
+*/
 char* read_line() {
     int buffer_size = BUF_SIZE;
     char* buffer = kmalloc(buffer_size);
@@ -125,6 +151,16 @@ char* read_line() {
     // return buffer;
 }
 
+/*
+    Func: split_line
+    Split the inputted line by _TOK_DELIM_
+
+    Parameters:
+        line - the inputted line to split
+    
+    Returns:
+        An array of strings containing the tokens after splitting the line
+*/
 char** split_line(char* line) {
     unsigned int i = 0; // The current position within the `args` array
 
@@ -162,7 +198,10 @@ char** split_line(char* line) {
     return args;
 }
 
-// Prints a help message, display a list of available shell commands
+/*
+    Func: xsh_help
+    Print a help message displaying the list of available commands
+*/
 void xsh_help() {
     kprintf(
         "echo:   print to the screen\n"
@@ -179,7 +218,10 @@ void xsh_help() {
         "uptime: get the system uptime in seconds\n");
 }
 
-// Prints the output after the "echo" command
+/*
+    Func: xdh_echo
+    Print the text after the _echo_ command
+*/
 void xsh_echo(char** args) {
     for (unsigned int i = 1; i < num_args; i++) {
         if (args[i] != NULL) {
@@ -190,17 +232,26 @@ void xsh_echo(char** args) {
     kprintf("\n");
 }
 
-// Exits the shell (and possibly the OS too. User should use "shutdown" command if they wish to shutdown the computer)
+/*
+    Func: xsh_exit
+    Exit the shell
+*/
 void xsh_exit() {
     kprintf("Exit requested!\n");
 }
 
-// Clears the screen
+/*
+    Func: xsh_clear_screen
+    Clear the terminal screen
+*/
 void xsh_clear_screen() {
     terminal_clear_screen();
 }
 
-// Display the contents of a file
+/*
+    Func: xsh_cat
+    Display the contents of a file
+*/
 void xsh_cat(char** args) {
     // The name of the file to read
     char* filename = args[1];
@@ -230,8 +281,10 @@ void xsh_cat(char** args) {
     fclose(fp);
 }
 
-// TODO: check for invalid filename
-// Create a new file
+/*
+    Func: xsh_touch
+    Create a new file
+*/
 void xsh_touch(char** args) {
     char* filename = args[0];
 
@@ -243,7 +296,10 @@ void xsh_touch(char** args) {
     vfs_create(filename);
 }
 
-// Change the current working directory
+/*
+    Func: xsh_cd
+    Change the current working directory
+*/
 void xsh_cd(char** args) {
     // Get the directory name to change to
     char* dirname = args[1];
@@ -257,8 +313,10 @@ void xsh_cd(char** args) {
             kprintf("cd: %s: no such directory\n", dirname);
     }
 }
-
-// List the contents of the current directory
+/*
+    Func: xsh_ls
+    Display the contents of the current directory
+*/
 void xsh_ls(char** args) {
     char* dirname = args[1];
 
@@ -271,12 +329,18 @@ void xsh_ls(char** args) {
     }
 }
 
-// Display the current working directory
+/*
+    Func: xsh_pwd
+    Print the current working directory
+*/
 void xsh_pwd() {
     kprintf("%s\n", current_dir);
 }
 
-// Remove a file from the filesystem
+/*
+    Func: xsh_rm
+    Remove a file from the filesystem
+*/
 void xsh_rm(char** args) {
     char* filename = args[1];
 
@@ -290,7 +354,10 @@ void xsh_rm(char** args) {
     }
 }
 
-// Remove a directory and its contents from the filesystem
+/*
+    Func: xsh_rmdir
+    Remove a directory and its contents from the filesystem
+*/
 void xsh_rmdir(char** args) {
     char* dirname = args[1];
 
@@ -304,12 +371,19 @@ void xsh_rmdir(char** args) {
     }
 }
 
+/*
+    Func: xsh_hostname
+    Print the system's hostname
+*/
 // Get the hostname for the system
 void xsh_hostname() {
     kprintf("%s\n", get_hostname());
 }
 
-// Login as a different user
+/*
+    Func: xsh_login
+    Login as a user using a username and password
+*/
 void xsh_login() {
     char* username = kmalloc(MAX_USERNAME_LENGTH);
     char* password = kmalloc(MAX_PASSWORD_LENGTH);
@@ -335,7 +409,10 @@ void xsh_login() {
     }
 }
 
-// Get the system's uptime in seconds
+/*
+    Func: xsh_uptime
+    Print the system uptime in seconds
+*/
 void xsh_uptime()
 {
     kprintf("0x%x seconds\n", get_uptime());

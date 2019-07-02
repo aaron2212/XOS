@@ -5,6 +5,10 @@
 
 #include "../../libc/include/size_t.h"
 
+/*
+    Constants: general constants used by the kernel
+        HEAP_SIZE_ALLOC_PERCENT - the amount of memory (as a percent) to be set aside for the kernel heap
+*/
 #define HEAP_SIZE_ALLOC_PERCENT 0.05 // The amount of memory to set aside for the heap (5%)
 
 extern void init_gdt();
@@ -13,20 +17,20 @@ extern void init_isrs();
 extern void init_irqs();
 extern void init_timer();
 extern int init_fs();
-extern const char* get_last_error();
+extern const char *get_last_error();
 
 void timer_wait(unsigned int ticks);
 void init_keyboard();
-char* strcpy(char* dest, const char* src);
-void gets(char* s);
+char *strcpy(char *dest, const char *src);
+void gets(char *s);
 
 extern int end;
 unsigned int available_memory; // Amount of available memory in KB
 unsigned int heap_size;        // Heap size in KB
 
 // The start and end of the rootfs filesystem loaded after the heap
-unsigned char* rootfs_start;
-unsigned char* rootfs_end;
+unsigned char *rootfs_start;
+unsigned char *rootfs_end;
 
 unsigned int kernel_end = (unsigned int)&end + 10;
 
