@@ -6,6 +6,10 @@
 unsigned int x = 0;
 unsigned int y = 0;
 
+/*
+	Func: terminal_init
+	Initialize the terminal and clear the screen
+*/
 // Initialize the terminal and clear the screen
 void terminal_init()
 {
@@ -23,7 +27,10 @@ void terminal_init()
 	move_cursor(0, 0);
 }
 
-// Write a character to the screen
+/*
+	Func: terminal_putchar
+	Write a character to the screen
+*/
 void terminal_putchar(char c)
 {
 	char *vidmem = (char *)0xB8000;
@@ -53,7 +60,10 @@ void terminal_putchar(char c)
 	}
 }
 
-// Write a string to the screen
+/*
+	Func: terminal_write
+	Write a string to the screen by repeatedly calling *terminal_putchar*
+*/
 void terminal_write(char *str)
 {
 	for (unsigned int i = 0; i < strlen(str); i++)
@@ -62,7 +72,10 @@ void terminal_write(char *str)
 	}
 }
 
-// Scoll the screen by one line
+/*
+	Func: terminal_write
+	Scroll the screen
+*/
 void terminal_scroll()
 {
 	char *vidmem = (char *)0xB8000;
@@ -75,7 +88,10 @@ void terminal_scroll()
 	}
 }
 
-// Clear the entire screen
+/*
+	Func: terminal_clear_screen
+	Clear the entire screen
+*/
 void terminal_clear_screen()
 {
 	char *vidmem = (char *)0xB8000;
@@ -91,19 +107,38 @@ void terminal_clear_screen()
 	move_cursor(0, 0);
 }
 
-// Get the current X position of the cursor
+/*
+	Func: get_cursor_x
+	Get the current X position of the cursor on the screen
+
+	Returns:
+		The current X position of the cursor on the screen as an integer
+*/
 int get_cursor_x()
 {
 	return x;
 }
 
-// Get the current Y position of the cursor
+/*
+	Func: get_cursor_y
+	Get the current Y position of the cursor on the screen
+
+	Returns:
+		The current Y position of the cursor on the screen as an integer
+*/
 int get_cursor_y()
 {
 	return y;
 }
 
-// Move the cursor on the screen
+/*
+	Func: move_cursor
+	Move the cursor to a specific (X, Y) coordinate on the screen
+
+	Parameters:
+		_x - the X cooridnate to move the cursor to
+		_y - the Y coordinate to move the cursor to
+*/
 void move_cursor(uint32_t _x, uint32_t _y)
 {
 	x = _x;

@@ -1,6 +1,16 @@
 #include "modules.h"
 
-// Return the address of the loaded GRUB module, or NULL if the module could not be loaded
+/*
+	Func: load_module
+	Get the address of a module loaded by GRUB
+
+	Parameters:
+		mbinfo - a structure representing the multiboot information received from GRUB
+		module - the name of the module to load
+	
+	Returns:
+		The address of the loaded GRUB module, or NULL if the module could not be loaded
+*/
 int* load_module(multiboot_info_t* mbinfo, const char* module)
 {
 	// Load the filesystem module
@@ -13,6 +23,18 @@ int* load_module(multiboot_info_t* mbinfo, const char* module)
 	return NULL;
 }
 
+/*
+	Func: load_module_by_magic
+	Load a GRUB module given the magic signature to search for
+
+	Parameters:
+		mbinfo - a structure representing the multiboot information received from GRUB
+		magic - the magic signature to search for in the module
+		offset - the offset of the magic number within in the GRUB module
+	
+	Returns:
+		The address of the loaded GRUB module, or NULL if the module could not be loaded
+*/
 int* load_module_by_magic(multiboot_info_t* mbinfo, const char* magic, int offset)
 {
 	// Get the pointer to the struct of GRUB loaded modules
@@ -33,5 +55,5 @@ int* load_module_by_magic(multiboot_info_t* mbinfo, const char* magic, int offse
 	}
 
 	set_error("failed to load module by magic");
-		return NULL;
+	return NULL;
 }

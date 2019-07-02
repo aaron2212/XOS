@@ -11,7 +11,10 @@
 
 extern void dump_memory(void* ptr, size_t size);
 
-// Initialize the superblock by filling its contents with the 512 bytes from rootfs_start
+/*
+    Func: init
+    Initialize the SFS filesystem by copying information into its superblock
+ */
 void init() {
     /*
      * Copy over the first 512 bytes if memory from `rootfs_start` into the superblock structure
@@ -52,7 +55,14 @@ void init() {
 }
 
 /*
- * Take in a filename and the mode (read, write, append) and return a FILE* type.
+    Func: open
+    Open a file
+
+    Parameters:
+        filename - the name of the file to open
+    
+    Returns:
+        A pointer to a FILE structure representing the opened file
  */
 FILE* open(char* filename /* , const char* mode */) { // TODO: check mode and existence of file/folder
     // Get a list of every file with its filename in the filesystem
@@ -114,7 +124,19 @@ FILE* open(char* filename /* , const char* mode */) { // TODO: check mode and ex
     return NULL;
 }
 
-// Read from a file
+/*
+    Func: read
+    Read from a file
+   
+    Parameters:
+        stream - the stream to read from
+        buf - the buffer to read into
+        len - the number of bytes to read
+    
+    Returns:
+        The number of bytes read from the file. This is either _len_ bytes, or the number
+        of bytes read up until the end of the file
+ */
 int read(FILE* stream, char* buf, size_t len) {
     unsigned int i = 0; // The number of bytes read from the file. Also used as an index into `buf`
     unsigned int num_bytes_to_read = 0;
@@ -145,9 +167,19 @@ int read(FILE* stream, char* buf, size_t len) {
     }
 }
 
-// TODO: check if path is absolute or relative
-// TODO: check if file already exists
-// Create a new empty file on the filesystem with the name `filename`
+/*
+    Func: create
+    Create an empty file
+
+    Parameters:
+        filename - the name of the file to create
+    
+    Returns:
+        A pointer to a FILE structure representing the newly created file
+    
+    See Also:
+        <open>
+*/
 FILE* create(char* filename) {
     // Check if the filename of the file to be created is valid. Replace NBSP characters with a space
     if (!is_filename_valid(filename)) {
@@ -277,11 +309,9 @@ FILE* create(char* filename) {
 }
 
 // Write to a file
-// TODO: implement
 void write() {
 }
 
-// Open a directory for reading and return a structure containing information about it
 DIR* opendir(char* dirname) {
     DIR* dir = kmalloc(sizeof(DIR));
     dir->entries = kcalloc(sizeof(struct dirent) * (total_rootfs_dirs + total_rootfs_entries), 1);
@@ -487,7 +517,16 @@ bool readdir_alternative(char* dirname) {
     return false;
 }
 
-// Change the current working directory
+/*
+    Func: changedir
+    Change the current working directory
+
+    Paramaters:
+        dirname - the name of the directory to change to
+    
+    Returns:
+        0 on success, -1 on failure (directory does not exist, for example)
+*/
 int changedir(char* dirname) {
     // Get a list of all the files and their filenames in the filesystem
     struct entry entries[total_rootfs_entries];
@@ -513,14 +552,34 @@ int changedir(char* dirname) {
     return -1;
 }
 
-// Close a previously opened directory
+/*
+    Func: closedir
+    Close a directory previously opened via a call to opendir
+
+    Parameters:
+        dir - the opened directory to close
+    
+    Returns:
+        0 on success, -1 on failure
+
+    See Also:
+        <opendir>
+*/
 int closedir(DIR* dir) {
 
     return vfs_closedir(dir);
 }
 
-// Attempt to remove (delete) a single file from the filesystem.
-// This is done by setting the entry to a deleted file entry
+/*
+    Func: rm
+    Remove a file from the filesystem by marking it as a deleted file entry
+
+    Paramaters:
+        filename - the name of the file to remove
+    
+    Returns:
+        True on success, false on failure
+*/
 bool rm(char* filename) {
     // make_full_path(filename);
 
@@ -534,13 +593,17 @@ bool rm(char* filename) {
     return false;
 }
 
-// Attempt to remove (delete) a directory from the filesystem
-bool rmdir(char* dirname) {
-    // kprintf("path exists: %d\n", path_exists(dirname));
-    // if (!path_exists(dirname)) {
-    //     return true;
-    // }
+/*
+    Func: rmdr
+    Remove a directory from the filesystem by marking it as a deleted directory entry
 
+    Paramaters:
+        filename - the name of the file to remove
+    
+    Returns:
+        True on success, false on failure
+*/
+bool rmdir(char* dirname) {
     // Get a list of all the files and their filenames in the filesystem
     struct entry entries[total_rootfs_entries];
     char** entry_names = kmalloc(total_rootfs_files + total_rootfs_dirs);
@@ -574,7 +637,16 @@ bool rmdir(char* dirname) {
     return entries_deleted;
 }
 
-// Given an offset to the start of an entry, find and return the entry's name
+/*
+    Func: get_entry_name_by_offset
+    Get the name of an entry given its offset in the filesystem
+
+    Paramaters:
+        pos - the offset of the file in the filesystem
+    
+    Returns:
+        The name of the file, or a NULL pointer
+*/
 char* get_entry_name_by_offset(char* pos) {
     /* Check if the position contains a valid entry
      * (don't include starting marker and volume identifier entries)
@@ -623,7 +695,17 @@ char* get_entry_name_by_offset(char* pos) {
     return NULL;
 }
 
-// Return a pointer to the start of the index entry corresponding to `name`
+/*
+    Func: get_offset_by_entry_name
+    This function does the reverse of _get_entry_name_by_offset_. It gets the offset
+    of a file in the filesystem given its name (full path) 
+
+    Paramaters:
+        name - the name of the file whose offset is returned
+    
+    Returns:
+        A pointer to the offset of the file in the filesystem
+*/
 unsigned char* get_offset_by_entry_name(char* name) {
     // Pointer to the index area so we can search for entries.
     // Used to keep track of the next index of the struct in the array
@@ -646,7 +728,18 @@ unsigned char* get_offset_by_entry_name(char* name) {
     return NULL;
 }
 
-// Get the full name of an entry given its position in the filesystem
+/*
+    Func: get_full_name
+    Get the full name of the entry given its position in the filesystem.
+    This function is needed to merge filenames which exist across multiple
+    entries (through the user of continuation entries)
+
+    Paramaters:
+        pos - a pointer to the offset of the file in the filesystem
+    
+    Returns:
+        The full name of the file
+*/
 char* get_full_name(unsigned char* pos) {
     unsigned int num_cont_entries = *(pos + 1);
     unsigned int name_len = ENTRY_SIZE + (num_cont_entries * ENTRY_SIZE);
@@ -673,7 +766,13 @@ char* get_full_name(unsigned char* pos) {
     return name;
 }
 
-// Populate an array of entry structs with a list of entries found in the filesystem
+/*
+    Func: find_all_entries
+    Populate an array of _entry_ structs with with a list of entries found in the filesystem
+
+    Paramaters:
+        entries - the array to populating with all the entries in the filesystem
+*/
 void find_all_entries(struct entry entries[]) {
     unsigned char* pos = rootfs_start + (1 * BYTES_PER_BLOCKS) + (rootfs_superblock.data_area_size * BYTES_PER_BLOCKS); // Pointer to the index area so we can search for entries
     unsigned int cur_entry = 0;                                                                                         // Used to keep track of the next index of the struct in the array
@@ -802,8 +901,21 @@ void find_all_entries(struct entry entries[]) {
     }
 }
 
-// Get a list of names of all the entries in the filesystem
-// TODO: check `_entry_type` to determine the size of the `entry_names` array
+/*
+    Func: get_entry_names
+    Get a list of names of the entries in the filesystem. This is only done for
+    directory entries and file entries
+
+    Paramaters:
+        entry_names - the list to fill with the names of the entries
+        entries - the array which contains a list of _entry_ structs received from a previous
+                  call to _find_all_entries_
+        _entry_type - the types of entries to find in the filesystem. This is an integer
+                      consisting of entry types which have been bitwise ORed together
+    
+    See Also:
+        <find_all_entries>
+*/
 void get_entry_names(char** entry_names, struct entry entries[], int _entry_type) {
     unsigned int i = 0; // Keep track of the name of the current entry to add to the array
 
@@ -891,7 +1003,12 @@ void get_entry_names(char** entry_names, struct entry entries[], int _entry_type
     }
 }
 
-// Get a count of all the files and directories currently in the filesystem
+/*
+    Func: count_files_and_dirs
+    Count the number of files and directories in the file system by checking
+    each entry's type. The results are stored in 2 separate global variables
+    _total_rootfs_dirs_ and _total_rootfs_files_
+*/
 void count_files_and_dirs() {
     struct entry entries[total_rootfs_entries];
 
@@ -911,7 +1028,27 @@ void count_files_and_dirs() {
     }
 }
 
-// Determine whether the filename contains invalid characters or if it is valid
+/*
+    Func: is_filename_valid
+    Determine if a filename is valid. A filename is invalid if it contains the following
+    characters:
+        - control character s(below 0x20)
+        - " (0x22)
+        - * (0x2A)
+        - : (0x3A)
+        - < (0x3C)
+        - > (0x3E)
+        - ? (0x3F)
+        - \ (0x5C)
+        - DEL (0x7F)
+    The no break space character (0xA0) is replaced with a space (0x20)
+
+    Paramaters:
+        filename - the name of the fild whose validity will be determined
+    
+    Returns:
+        True if the name of the file is valid, false otherwise
+*/
 bool is_filename_valid(char* filename) {
     /* 
      * Check for any invalid characters in the filename.
@@ -941,7 +1078,16 @@ bool is_filename_valid(char* filename) {
     return true;
 }
 
-// Determine if a file or directory exists in the filesystem
+/*
+    Func: path_exists
+    Determine if a path exists in the filesystem
+
+    Paramaters:
+        path - the path to check for existence
+    
+    Returns:
+        True if the path exists, false otherwise
+*/
 // ERROR: NOT WORKING
 bool path_exists(char* path) {
     // Get a list of all the file and directories names in the filesystem
@@ -966,7 +1112,16 @@ bool path_exists(char* path) {
     return false;
 }
 
-// Determine if an entry is a directory by checking it's type
+/*
+    Func: is_dir
+    Determine if a path is a directory
+
+    Paramaters:
+        path - the path to check
+    
+    Returns:
+        True if the path is a directory, false otherwise
+*/
 bool is_dir(char* path) {
     make_full_path(path);
     unsigned char* offset = get_offset_by_entry_name(path);
@@ -974,7 +1129,16 @@ bool is_dir(char* path) {
     return *offset == DIRECTORY_ENTRY;
 }
 
-// Determine if an entry is a file by checking it's type
+/*
+    Func: is_file
+    Determine if a path is a file
+
+    Paramaters:
+        path - the file to check
+    
+    Returns:
+        True if the file is a directory, false otherwise
+*/
 bool is_file(char* path) {
     make_full_path(path);
     unsigned char* offset = get_offset_by_entry_name(path);

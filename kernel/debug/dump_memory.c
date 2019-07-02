@@ -2,6 +2,14 @@
 
 #include "debug.h"
 
+/*
+    Func: dump_memory
+    Display the contents of memory
+
+    Parameters:
+        ptr - the position in memory to start displaying from
+        size - the number of bytes of memory to display
+*/
 void dump_memory(void* ptr, size_t size)
 {
     //unsigned int line_len = 0;

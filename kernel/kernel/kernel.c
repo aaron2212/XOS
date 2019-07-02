@@ -12,6 +12,13 @@
 
 // TODO: move all kprintf() status messages to the appropriate functions
 
+/*
+    Func: k_main
+    The entry point for the kernel. Initializes the operating system
+
+    Parameters:
+        mb_struct - a pointer to the multiboot structure received from GRUB
+*/
 void k_main(void* mb_struct) {
     terminal_init();
     kprintf("XOS booting...\n\n");

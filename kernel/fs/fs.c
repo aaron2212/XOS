@@ -4,6 +4,16 @@
 
 #include "../../libc/include/_null.h"
 
+/*
+    Func: init_fs
+    Initialize the system for filesystem use. Fill the root filesystem structure with information
+
+    Parameters:
+        multiboot_info_t - a structure representing multiboot information received from GRUB
+    
+    Returns:
+        0 on success, -1 otherwise
+*/
 // Perform initialization of the rootfs filesystem
 int init_fs(multiboot_info_t *mbinfo)
 {

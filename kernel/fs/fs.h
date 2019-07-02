@@ -1,6 +1,18 @@
 #ifndef _FS_H
 #define _FS_H
 
+/*
+    Constants: constants relating to all filesystems
+        ROOTFS_NAME = "SFS" - the name of the root filesystem
+        ROOTFS_TYPE = "rootfs" - the type of the root filesystem
+        ROOTFS_MOUNT_POINT = "/" - the mount point for the root filesystem
+        CURRENT_DIR_BUF = 1024 - the maximum amount of characters that can be stored for the current diectory
+        PATH_SEPARATOR = "/" - the character that separates each file/directory (as a string)
+        PATH_SEPARATOR_CHAR = '/' the character that separates each file/directory (as a char)
+        ROOT_DIR = '/' - a string representing the root directory
+        MAX_OPEN_FILES 32768 - the maximum number of files that can be opened at any given time
+*/
+
 #define ROOTFS_NAME "SFS"
 #define ROOTFS_TYPE "rootfs"
 #define ROOTFS_MOUNT_POINT "/"

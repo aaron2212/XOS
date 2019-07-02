@@ -2,13 +2,26 @@
 
 #include "errors.h"
 
-// Return the error message
+/*
+	Func: get_last_error
+	Get the error message of the last error that occured
+
+	Returns:
+		A string of the error message of last error that occured
+*/
 const char *get_last_error()
 {
 	return error_message;
 }
 
-// Set the error message
+/*
+	Func: set_error
+	Set the error message for the last error that occured
+
+	Parameters:
+		message - a formatted error message
+		... - the arguments for the formatted error message
+*/
 void set_error(const char *message, ...)
 {
 	va_list args;
