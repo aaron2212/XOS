@@ -1,8 +1,0 @@
-General:
-    - not enough config settings/options. Too many hardcoded values and assumptions that
-      things were already configured a certain way
-    - build a better way to handle and display errors
-
-Filesystem:
-    - superblock values were not updated when they needed to be (example: timestamp was 
-      not updated when a file was added/removed)

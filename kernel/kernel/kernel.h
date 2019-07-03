@@ -17,6 +17,7 @@ extern void init_isrs();
 extern void init_irqs();
 extern void init_timer();
 extern int init_fs();
+extern void init_system_calls();
 extern const char *get_last_error();
 
 void timer_wait(unsigned int ticks);

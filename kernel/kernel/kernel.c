@@ -65,18 +65,28 @@ void k_main(void* mb_struct) {
     kprintf("Heap size: %dMB\n", (heap_size / 1024 / 1024)); // Convert heap size to megabytes
 
     // If the filesystem was loaded successfully (enough memory, mounted filesystem etc)
-    if (is_fs_loaded)
+    if (is_fs_loaded) {
         kprintf("Filesystem loaded at address 0x%x: %d directories, %d files\n",
                 rootfs_start, total_rootfs_dirs, total_rootfs_files);
-    else
+        // Initialize system configurations
+        init_system();
+    } else {
         kprintf("Could not load filesystem: %s\n", get_last_error());
+    }
 
-    // Initialize system configurations
-    init_system();
-
-    kprintf("Entering user mode...");
-    enter_usermode();
+    kprintf("Initializing system calls... ");
+    init_system_calls();
     kprintf("OK\n");
+
+    kprintf("Entering user mode... ");
+    // enter_usermode();
+    // kprintf("OK\n");
+
+    asm(
+        "mov $0, %eax\n"
+        "mov $0, %ebx\n"
+        "int $0x80"
+    );
     
     while (1) {
         shell();

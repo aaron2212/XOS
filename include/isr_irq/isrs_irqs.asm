@@ -48,6 +48,8 @@ global irq13
 global irq14
 global irq15
 
+global syscall
+
 extern isr_fault_handler
 extern irq_fault_handler
 
@@ -363,17 +365,20 @@ irq15:
 	push 47
 	jmp irq_handler
 
+syscall:
+	cli
+	push 0x80
+	push byte 0
+	; mov eax, 0x1
+	; mov ebx, 0x2
+	; mov ecx, 0x3
+	; mov edx, 0x4
+	; mov edi, 0x5
+	; mov esi, 0x6
+	; mov ebp, 0x7
+	jmp isr_handler
+
 isr_handler:
-	mov eax, 0x1000
-	mov ebx, 0x1001
-	mov ecx, 0x1002
-	mov edx, 0x1003
-	mov ax, 020
-	mov ax, 0x10			; load the kernel data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
 	pusha					; push eax, ecx, edx, ebx, esp, ebp, esi, edi
 	push ds
 	push es

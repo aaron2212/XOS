@@ -39,11 +39,30 @@ extern void isr31();
 
 struct regs
 {
-	uint32_t gs, fs, es, ds;						 // push segments last
-	uint32_t edi, ebp, esi, esp, eax, ebx, edx, ecx; // pushed by 'pusha'
-	uint32_t err_code, int_no;						 // 'push byte #' and error code
-	uint32_t eip, cs, eflags, useresp, ss;			 // pushed by CPU automatically
-};
+	uint32_t gs; // segment registers
+	uint32_t fs;
+	uint32_t es;
+	uint32_t ds;
+	uint32_t reserved; // don't know what this is?
+	uint32_t edi;	  // general purpose registers
+	uint32_t esi;
+	uint32_t ebp;
+	uint32_t esp;
+	uint32_t ebx; // 48 bytes
+	uint32_t edx;
+	uint32_t ecx;
+	uint32_t eax;
+	uint32_t err_code; // push error code
+	uint32_t int_no;   // push byte #
+	uint32_t eip;	  // pushed by CPU automatically
+	uint32_t cs;	   // pushed by CPU automatically
+	uint32_t eflags;   // pushed by CPU automatically
+	uint32_t useresp;  // pushed by CPU automatically
+	uint32_t ss;	   // pushed by CPU automatically
+} __attribute__((packed));
+
+extern void syscall();
+extern void handle_syscall(struct regs r);
 
 void init_isrs();
 void isr_fault_handler(struct regs r);

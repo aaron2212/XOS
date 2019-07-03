@@ -7,6 +7,10 @@ extern void idt_set_gate(uint32_t i, uint64_t base, uint16_t selector, uint8_t f
 unsigned char outb(uint16_t port, uint8_t val);
 unsigned char inb(uint16_t port);
 
+/*
+	Func: init_isrs
+	Initialize the ISRs by setting a function that handles each interrupt
+*/
 void init_isrs()
 {
 	idt_set_gate(0, (uint32_t) isr0, 0x08, 0x8E);
@@ -41,6 +45,7 @@ void init_isrs()
 	idt_set_gate(29, (uint32_t) isr29, 0x08, 0x8E);
 	idt_set_gate(30, (uint32_t) isr30, 0x08, 0x8E);
 	idt_set_gate(31, (uint32_t) isr31, 0x08, 0x8E);
+	idt_set_gate(0x80, (uint32_t) syscall, 0x08, 0x8E); // System call interrupt
 }
 
 char *exception_message[] =
@@ -79,6 +84,13 @@ char *exception_message[] =
 	"Reserved",
 };
 
+/*
+	Func: dump_registers
+	Displays register values (typically used at the time of an exception occuring)
+
+	Parameters:
+		r - a structure containing each register's value
+*/
 void dump_registers(struct regs r)
 {
 	kprintf("eax=0x%x\n", r.eax);
@@ -100,12 +112,22 @@ void dump_registers(struct regs r)
 	kprintf("gs=0x%x\n", r.gs);
 }
 
+/*
+	Func: isr_fault_handler
+	Handles exception
+
+	Parameters:
+		r - a structure representing the saved registers at the time the exception occured
+*/
 void isr_fault_handler(struct regs r)
 {
 	if (r.int_no < 32)
 	{
-		/* display description of exception that has occured */
 		kprintf("Caught exception 0x%x [%s]. Dumping registers\n", r.int_no, exception_message[r.int_no]);
 		dump_registers(r);
+		asm("hlt");
+	}
+	else if (r.int_no == 0x80) {
+		handle_syscall(r);
 	}
 }
