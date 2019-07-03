@@ -1,5 +1,6 @@
 #include "shell.h"
 #include "../system/system.h"
+#include "../system/syscalls/syscalls.h"
 
 /*
     Struct: fn_table_entry
@@ -293,7 +294,7 @@ void xsh_touch(char** args) {
         return;
     }
 
-    vfs_create(filename);
+    sys_creat(filename);
 }
 
 /*
@@ -307,7 +308,7 @@ void xsh_cd(char** args) {
     // Only attempt to change the directory if the user specified a directory
     if (strcmp(dirname, "") != 0) {
         // result=-1 means failed to find directory matching `dirname`
-        int result = vfs_changedir(dirname);
+        int result = sys_chdir(dirname);
 
         if (result == -1)
             kprintf("cd: %s: no such directory\n", dirname);

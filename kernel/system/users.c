@@ -34,12 +34,6 @@ void init_users() {
         user.uid = atoi(parts[2]);
         strcpy(user.home_dir, (char*)parts[3]);
 
-        // kprintf("uid=%s\n", user.uid);
-        // kprintf("username=%s\n", user.username);
-        // kprintf("password=%s\n", user.password);
-        // kprintf("home_dir=%s\n", user.home_dir);
-
-        // users[j++] = user;
         total_user_count = j;
 
         memcpy(&users[j++], &user, sizeof(user));
@@ -49,11 +43,6 @@ void init_users() {
 
     total_user_count = j;
     current_user = users[0];
-
-    // kprintf("uid=0x%x\n", users[1].uid);
-    // kprintf("username=%s\n", users[1].username);
-    // kprintf("password=%s\n", users[1].password);
-    // kprintf("home_dir=%s\n", users[1].home_dir);
 }
 
 // Return a structure representing the current user

@@ -18,35 +18,6 @@
 #include "../fs/vfs.h"
 #include "../../include/isr_irq/isrs.h"
 
-#define MAX_SYSCALL_COUNT 11
-
-/*
-    Constants: system call numbers
-        SYSCALL_EXIT     = 0
-        SYSCALL_FORK     = 1
-        SYSCALL_READ     = 2
-        SYSCALL_OPEN     = 3
-        SYSCALL_CLOSE    = 4
-        SYSCALL_CREATE   = 5
-        SYSCALL_EXECVE   = 6
-        SYSCALL_CHDIR    = 7
-        SYSCALL_TIME     = 8
-        SYSCALL_GETPID   = 9
-        SYSCALL_GETUID   = 10
- */
-
-#define SYSCALL_EXIT     0
-#define SYSCALL_FORK     1
-#define SYSCALL_READ     2
-#define SYSCALL_OPEN     3
-#define SYSCALL_CLOSE    4
-#define SYSCALL_CREAT    5
-#define SYSCALL_EXECVE   6
-#define SYSCALL_CHDIR    7
-#define SYSCALL_TIME     8
-#define SYSCALL_GETPID   9
-#define SYSCALL_GETUID   10
-
 // sizeof(struct user) = 766
 struct user {
     uint8_t uid;
@@ -109,20 +80,6 @@ int bcd2bin(int bcd);
 
 // User mode
 void enter_usermode();
-
-// System calls
-extern void setup_syscall_params();
-
-void init_system_calls();
-void register_system_call(int num, void (*syscall)());
-void handle_syscall(struct regs r);
-void (*syscalls[MAX_SYSCALL_COUNT])();
-extern void execute_syscall(void* syscall, struct regs r);
-
-void sys_exit(int status_code);
-void sys_fork();
-void sys_read(void* buffer, size_t size, size_t count, FILE* stream);
-void sys_open(char* filename, char* mode);
 
 extern FILE* fopen(char* filename, const char* mode);
 extern int fread(void* buffer, size_t size, size_t count, FILE* stream);

@@ -7,11 +7,12 @@ int fclose(FILE* stream)
     if (stream == NULL)
         return EOF;
     
+    stream = NULL;
     // Remove the file stream `stream` from the list of file stream
-    vfs_close(stream);
+    sys_close(stream);
 
     kfree(stream);
-    stream = NULL;
+    
 
     return 0;
 }

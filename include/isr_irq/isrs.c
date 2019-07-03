@@ -130,4 +130,6 @@ void isr_fault_handler(struct regs r)
 	else if (r.int_no == 0x80) {
 		handle_syscall(r);
 	}
+
+	asm("sti");
 }

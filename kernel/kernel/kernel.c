@@ -7,6 +7,8 @@
 #include "../include/tty.c"
 #include "../modules/modules.c"
 #include "../system/system.h"
+#include "../system/syscalls/syscalls.h"
+#include "../include/io.h"
 
 /* main part of kernel code */
 
@@ -79,15 +81,9 @@ void k_main(void* mb_struct) {
     kprintf("OK\n");
 
     kprintf("Entering user mode... ");
-    // enter_usermode();
-    // kprintf("OK\n");
+    enter_usermode();
+    kprintf("OK\n");
 
-    asm(
-        "mov $0, %eax\n"
-        "mov $0, %ebx\n"
-        "int $0x80"
-    );
-    
     while (1) {
         shell();
     }

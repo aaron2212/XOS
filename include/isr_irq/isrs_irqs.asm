@@ -369,13 +369,6 @@ syscall:
 	cli
 	push 0x80
 	push byte 0
-	; mov eax, 0x1
-	; mov ebx, 0x2
-	; mov ecx, 0x3
-	; mov edx, 0x4
-	; mov edi, 0x5
-	; mov esi, 0x6
-	; mov ebp, 0x7
 	jmp isr_handler
 
 isr_handler:
