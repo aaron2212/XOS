@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_getuid.c","sys_getuid.c");NDSummary.OnSummaryLoaded("File7:sys_getuid.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[182,0,1,"Functions","Functions"],[183,0,0,"sys_getuid","sys_getuid"]]);

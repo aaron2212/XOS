@@ -62,6 +62,10 @@ Source Folder 5: ../../kernel/modules
 Source Folder 6: ../../kernel/include
    Name: include
 
+Source Folder 7: ../../kernel/system/syscalls
+   Name: syscalls
+
+
 
 
 

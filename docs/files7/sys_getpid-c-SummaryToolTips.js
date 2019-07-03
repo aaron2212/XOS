@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("File7:sys_getpid.c",{185:"<div class=\"NDToolTip TFunction LC\"><div id=\"NDPrototype185\" class=\"NDPrototype NoParameterForm\"><span class=\"SHKeyword\">int</span> sys_getpid()</div><div class=\"TTSummary\">Get the process ID (uid) for the currently running user</div></div>"});

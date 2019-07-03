@@ -1,1 +1,1 @@
-NDSearch.OnPrefixDataLoaded("ini",["Function"],[["init",,[[,,,,0,"File:sfs.c:init"]]],["init_fs",,[[,,,,0,"File:fs.c:init_fs"]]]]);
+NDSearch.OnPrefixDataLoaded("ini",["Function"],[["init",,[[,,,,0,"File:sfs.c:init"]]],["init_fs",,[[,,,,0,"File:fs.c:init_fs"]]],["initialize_system_calls",,[[,,,,0,"File7:syscalls.c:initialize_system_calls"]]]]);

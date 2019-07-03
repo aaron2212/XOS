@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_fork.c","sys_fork.c");NDSummary.OnSummaryLoaded("File7:sys_fork.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[172,0,1,"Functions","Functions"],[173,0,0,"sys_fork","sys_fork"]]);

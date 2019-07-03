@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:syscalls.h","syscalls.h");NDSummary.OnSummaryLoaded("File7:syscalls.h",[["C/C++","C"]],[["Constants","Constant"],["Groups","Group"]],[[164,0,1,"Constants","Constants"],[165,0,0,"system call numbers","system_call_numbers"]]);

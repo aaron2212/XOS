@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_chdir.c","sys_chdir.c");NDSummary.OnSummaryLoaded("File7:sys_chdir.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[180,0,1,"Functions","Functions"],[181,0,0,"sys_chdir","sys_chdir"]]);

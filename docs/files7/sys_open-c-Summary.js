@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_open.c","sys_open.c");NDSummary.OnSummaryLoaded("File7:sys_open.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[170,0,1,"Functions","Functions"],[171,0,0,"open","open"]]);

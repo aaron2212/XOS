@@ -1,1 +1,1 @@
-NDSearch.OnPrefixDataLoaded("reg",["Struct"],[["regs",,[[,,,,0,"File6:kbd.h:regs","CClass:regs"]]]]);
+NDSearch.OnPrefixDataLoaded("reg",["Function","Struct"],[["register_system_call",,[[,,,,0,"File7:syscalls.c:register_system_call"]]],["regs",,[[,,,,1,"File6:kbd.h:regs","CClass:regs"]]]]);

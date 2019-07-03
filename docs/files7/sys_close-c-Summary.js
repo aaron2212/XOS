@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_close.c","sys_close.c");NDSummary.OnSummaryLoaded("File7:sys_close.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[178,0,1,"Functions","Functions"],[179,0,0,"sys_close","sys_close"]]);

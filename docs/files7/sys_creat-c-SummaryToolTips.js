@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("File7:sys_creat.c",{177:"<div class=\"NDToolTip TFunction LC\"><div class=\"TTSummary\">Create a new, empty file</div></div>"});

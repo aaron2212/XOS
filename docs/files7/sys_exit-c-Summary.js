@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:sys_exit.c","sys_exit.c");NDSummary.OnSummaryLoaded("File7:sys_exit.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[174,0,1,"Functions","Functions"],[175,0,0,"sys_exit","sys_exit"]]);

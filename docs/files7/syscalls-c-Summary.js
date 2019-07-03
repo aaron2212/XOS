@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("File7:syscalls.c","syscalls.c");NDSummary.OnSummaryLoaded("File7:syscalls.c",[["C/C++","C"]],[["Functions","Function"],["Groups","Group"]],[[166,0,1,"Functions","Functions"],[167,0,0,"initialize_system_calls","initialize_system_calls"],[168,0,0,"register_system_call","register_system_call"],[169,0,0,"handle_syscall","handle_syscall"]]);

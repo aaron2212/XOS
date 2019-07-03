@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("File7:sys_fork.c",{173:"<div class=\"NDToolTip TFunction LC\"><div id=\"NDPrototype173\" class=\"NDPrototype NoParameterForm\"><span class=\"SHKeyword\">void</span> sys_fork()</div><div class=\"TTSummary\">Create a new process (not implemeted yet)</div></div>"});
